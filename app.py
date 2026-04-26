@@ -66,24 +66,25 @@ html, body, [class*="css"] {
     margin: 2rem 0 1rem 0;
 }
 .kpi-card {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    border: 1px solid #1e3a5f;
+    background: linear-gradient(135deg, #37003c 0%, #1a0020 100%);
+    border: 1px solid #00ff85;
     border-radius: 12px;
     padding: 1.2rem 1.5rem;
     text-align: center;
+    box-shadow: 0 0 15px rgba(0,255,133,0.1);
 }
 .kpi-value {
     font-family: 'Bebas Neue', cursive;
     font-size: 2.8rem;
     letter-spacing: 2px;
-    color: #38bdf8;
+    color: #00ff85;
     line-height: 1;
 }
 .kpi-label {
     font-size: 0.7rem;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: #475569;
+    color: rgba(255,255,255,0.4);
     margin-top: 0.3rem;
 }
 .insight-box {
@@ -114,7 +115,7 @@ html, body, [class*="css"] {
     color: #4ade80;
 }
 .stTabs [data-baseweb="tab-list"] {
-    background: #0f172a;
+    background: #37003c;
     border-radius: 10px;
     padding: 4px;
     gap: 4px;
@@ -130,8 +131,9 @@ html, body, [class*="css"] {
     padding: 0.5rem 1rem;
 }
 .stTabs [aria-selected="true"] {
-    background: #1e3a5f !important;
-    color: #38bdf8 !important;
+    background: #00ff85 !important;
+    color: #37003c !important;
+    font-weight: 700 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -348,8 +350,8 @@ def draw_pitch_opta(fig, bg="#0a1628"):
 # ─────────────────────────────────────────────
 # HEADER
 # ─────────────────────────────────────────────
-st.markdown("<div class='hero-title'>Premier League ML Analytics</div>", unsafe_allow_html=True)
-st.markdown("<div class='hero-sub'>Machine Learning I — Universidad Externado de Colombia · 2026</div>", unsafe_allow_html=True)
+st.markdown("<div class='hero-title' style='font-size:3.2rem;'>Premier League ML Analytics</div>", unsafe_allow_html=True)
+st.markdown("<div class='hero-sub'>Machine Learning I &mdash; Universidad Externado de Colombia &middot; 2026</div>", unsafe_allow_html=True)
 
 # KPIs globales
 k1, k2, k3, k4, k5 = st.columns(5)
