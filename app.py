@@ -132,8 +132,282 @@ html, body, [class*="css"] {
     background: #1e3a5f !important;
     color: #38bdf8 !important;
 }
+.stButton > button {
+    background: #00ff85 !important;
+    color: #37003c !important;
+    font-family: 'Bebas Neue', cursive !important;
+    font-size: 1.3rem !important;
+    letter-spacing: 4px !important;
+    border: none !important;
+    border-radius: 50px !important;
+    padding: 0.8rem 2rem !important;
+    box-shadow: 0 0 30px rgba(0,255,133,0.4) !important;
+    margin-top: 2rem !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
+
+</style>
+""", unsafe_allow_html=True)
+# ── PANTALLA DE BIENVENIDA ANIMADA ──────────────────────
+if 'show_dashboard' not in st.session_state:
+    st.session_state.show_dashboard = False
+
+if not st.session_state.show_dashboard:
+    st.markdown("""
+    <style>
+    .main { background: #0a0012 !important; }
+    #MainMenu, header, footer { visibility: hidden; }
+    
+    @keyframes ball_move {
+        0%   { left: -10%; top: 60%; transform: scale(0.8); }
+        40%  { left: 55%;  top: 45%; transform: scale(1.0); }
+        70%  { left: 80%;  top: 48%; transform: scale(0.9); }
+        85%  { left: 88%;  top: 49%; transform: scale(0.7); }
+        100% { left: 91%;  top: 49%; transform: scale(0.5); opacity: 0; }
+    }
+    @keyframes net_shake {
+        0%,70%  { transform: skew(0deg); }
+        75%      { transform: skew(-4deg) scaleX(1.04); }
+        80%      { transform: skew(3deg) scaleX(0.97); }
+        85%      { transform: skew(-2deg); }
+        100%     { transform: skew(0deg); }
+    }
+    @keyframes goal_appear {
+        0%,75%   { opacity: 0; transform: scale(0.3) rotate(-10deg); }
+        80%      { opacity: 1; transform: scale(1.3) rotate(3deg); }
+        90%      { transform: scale(0.95) rotate(-1deg); }
+        100%     { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    @keyframes title_appear {
+        0%,85%  { opacity: 0; transform: translateY(30px); }
+        100%    { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes btn_appear {
+        0%,90%  { opacity: 0; transform: translateY(20px); }
+        100%    { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes crowd_flash {
+        0%,74%  { opacity: 0; }
+        76%     { opacity: 0.6; }
+        78%     { opacity: 0.1; }
+        80%     { opacity: 0.7; }
+        82%     { opacity: 0.2; }
+        84%     { opacity: 0.5; }
+        100%    { opacity: 0.15; }
+    }
+    @keyframes confetti_fall {
+        0%   { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+        10%  { opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+    @keyframes grass_lines {
+        0%  { opacity: 0.3; }
+        50% { opacity: 0.6; }
+        100%{ opacity: 0.3; }
+    }
+    
+    .welcome-container {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: linear-gradient(180deg, #0a0012 0%, #1a0030 50%, #0d1a00 100%);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+    
+    /* Césped */
+    .grass {
+        position: absolute;
+        bottom: 0; left: 0;
+        width: 100%; height: 35%;
+        background: linear-gradient(180deg, #1a4d00 0%, #0d2900 100%);
+    }
+    .grass-line {
+        position: absolute;
+        top: 0; height: 100%;
+        width: 10%;
+        background: rgba(255,255,255,0.03);
+        animation: grass_lines 3s infinite;
+    }
+    
+    /* Arco */
+    .goal-post {
+        position: absolute;
+        right: 6%;
+        bottom: 33%;
+        width: 130px;
+        height: 90px;
+        border: 5px solid white;
+        border-bottom: none;
+        border-radius: 2px 2px 0 0;
+        animation: net_shake 3s ease-in-out infinite;
+    }
+    .goal-net {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: repeating-linear-gradient(
+            0deg, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 1px,
+            transparent 1px, transparent 10px
+        ),
+        repeating-linear-gradient(
+            90deg, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 1px,
+            transparent 1px, transparent 10px
+        );
+    }
+    
+    /* Pelota */
+    .ball {
+        position: absolute;
+        bottom: 33%;
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, white 0%, #ddd 40%, #999 100%);
+        box-shadow: 2px 2px 8px rgba(0,0,0,0.5),
+                    inset -3px -3px 6px rgba(0,0,0,0.3);
+        animation: ball_move 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+    }
+    
+    /* Flash de gol */
+    .crowd-flash {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: radial-gradient(ellipse at 85% 60%, #00ff85 0%, transparent 60%);
+        animation: crowd_flash 3s ease-in-out infinite;
+        pointer-events: none;
+    }
+    
+    /* GOAL text */
+    .goal-text {
+        font-family: 'Bebas Neue', cursive;
+        font-size: 9rem;
+        color: #00ff85;
+        text-shadow: 0 0 40px #00ff85, 0 0 80px #00ff85, 0 0 120px rgba(0,255,133,0.5);
+        letter-spacing: 8px;
+        animation: goal_appear 3s ease-out infinite;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Título */
+    .welcome-title {
+        font-family: 'Bebas Neue', cursive;
+        font-size: 2rem;
+        color: rgba(255,255,255,0.9);
+        letter-spacing: 6px;
+        animation: title_appear 3s ease-out infinite;
+        text-align: center;
+        margin-bottom: 0.3rem;
+    }
+    .welcome-sub {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.4);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        animation: title_appear 3s ease-out infinite;
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+    
+    /* Confetti */
+    .confetti-piece {
+        position: absolute;
+        width: 10px; height: 10px;
+        border-radius: 2px;
+        animation: confetti_fall linear infinite;
+    }
+    
+    /* Botón */
+    .enter-btn {
+        background: #00ff85;
+        color: #37003c;
+        border: none;
+        padding: 1rem 3rem;
+        font-family: 'Bebas Neue', cursive;
+        font-size: 1.5rem;
+        letter-spacing: 4px;
+        border-radius: 50px;
+        cursor: pointer;
+        animation: btn_appear 3s ease-out forwards;
+        box-shadow: 0 0 30px rgba(0,255,133,0.4);
+        transition: all 0.2s;
+    }
+    .enter-btn:hover {
+        background: white;
+        transform: scale(1.05);
+        box-shadow: 0 0 50px rgba(0,255,133,0.7);
+    }
+    </style>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+    
+    <div class="welcome-container">
+        
+        <!-- Flash de gol -->
+        <div class="crowd-flash"></div>
+        
+        <!-- Confetti -->
+        <div class="confetti-piece" style="left:10%;top:-5%;background:#00ff85;animation-duration:2.8s;animation-delay:2.9s;"></div>
+        <div class="confetti-piece" style="left:20%;top:-5%;background:#37003c;animation-duration:3.2s;animation-delay:3.1s;width:6px;height:14px;"></div>
+        <div class="confetti-piece" style="left:35%;top:-5%;background:#ffffff;animation-duration:2.5s;animation-delay:2.8s;"></div>
+        <div class="confetti-piece" style="left:50%;top:-5%;background:#00ff85;animation-duration:3.5s;animation-delay:3.0s;width:8px;height:8px;border-radius:50%;"></div>
+        <div class="confetti-piece" style="left:65%;top:-5%;background:#ff6b6b;animation-duration:2.9s;animation-delay:2.95s;"></div>
+        <div class="confetti-piece" style="left:75%;top:-5%;background:#00ff85;animation-duration:3.1s;animation-delay:3.2s;width:12px;height:6px;"></div>
+        <div class="confetti-piece" style="left:85%;top:-5%;background:#ffffff;animation-duration:2.7s;animation-delay:2.85s;"></div>
+        <div class="confetti-piece" style="left:90%;top:-5%;background:#37003c;animation-duration:3.3s;animation-delay:3.05s;width:6px;height:16px;"></div>
+        
+        <!-- Césped -->
+        <div class="grass">
+            <div class="grass-line" style="left:0%;animation-delay:0s;"></div>
+            <div class="grass-line" style="left:10%;animation-delay:0.3s;"></div>
+            <div class="grass-line" style="left:20%;animation-delay:0.6s;"></div>
+            <div class="grass-line" style="left:30%;animation-delay:0.9s;"></div>
+            <div class="grass-line" style="left:40%;animation-delay:1.2s;"></div>
+            <div class="grass-line" style="left:50%;animation-delay:1.5s;"></div>
+            <div class="grass-line" style="left:60%;animation-delay:1.8s;"></div>
+            <div class="grass-line" style="left:70%;animation-delay:2.1s;"></div>
+            <div class="grass-line" style="left:80%;animation-delay:2.4s;"></div>
+            <div class="grass-line" style="left:90%;animation-delay:2.7s;"></div>
+        </div>
+        
+        <!-- Arco -->
+        <div class="goal-post">
+            <div class="goal-net"></div>
+        </div>
+        
+        <!-- Pelota -->
+        <div class="ball"></div>
+        
+        <!-- Contenido central -->
+        <div style="position:relative;z-index:10;text-align:center;">
+            <div class="goal-text">⚽ GOAL!</div>
+            <div class="welcome-title">Premier League ML Analytics</div>
+            <div class="welcome-sub">Machine Learning I · Universidad Externado · 2026</div>
+        </div>
+        
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Botón real de Streamlit para entrar
+    col_center = st.columns([1, 2, 1])[1]
+    with col_center:
+        st.markdown("<br><br><br><br><br><br><br><br><br><br><br><br><br><br>", unsafe_allow_html=True)
+        if st.button("⚽  ENTRAR AL DASHBOARD", use_container_width=True, type="primary"):
+            st.session_state.show_dashboard = True
+            st.rerun()
+    st.stop()
+
+
+
+
 
 # ─────────────────────────────────────────────
 # CARGA DE DATOS REALES
