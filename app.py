@@ -304,47 +304,66 @@ M = train_all_models(shots_final, matches)
 # HELPER: CANCHA
 # ─────────────────────────────────────────────
 def draw_pitch_opta(fig, bg="#2d5a1b"):
-    lc = "rgba(255,255,255,0.9)"
-    # Fondo verde con franjas
-    for i in range(10):
-        color = "#2d5a1b" if i % 2 == 0 else "#347a20"
-        fig.add_shape(type="rect", 
+    lc = "rgba(255,255,255,0.95)"
+    
+    # Franjas verdes (simula textura real)
+    colores = ["#2d6e1a", "#347d1e", "#2d6e1a", "#347d1e", "#2d6e1a",
+               "#347d1e", "#2d6e1a", "#347d1e", "#2d6e1a", "#347d1e"]
+    for i, color in enumerate(colores):
+        fig.add_shape(type="rect",
                       x0=i*10, y0=0, x1=(i+1)*10, y1=100,
                       fillcolor=color, line=dict(width=0), layer="below")
-    # Borde campo
+
+    # Borde exterior
     fig.add_shape(type="rect", x0=0, y0=0, x1=100, y1=100,
-                  line=dict(color=lc, width=2), fillcolor="rgba(0,0,0,0)")
-    # Mediocampo
+                  line=dict(color=lc, width=2.5))
+    # Línea media
     fig.add_shape(type="line", x0=50, y0=0, x1=50, y1=100,
                   line=dict(color=lc, width=2))
+    # Círculo central
     fig.add_shape(type="circle", x0=41, y0=41, x1=59, y1=59,
                   line=dict(color=lc, width=2))
-    fig.add_shape(type="circle", x0=48, y0=48, x1=52, y1=52,
-                  line=dict(color=lc, width=2), fillcolor=lc)
-    # Área grande derecha
+    # Punto central
+    fig.add_shape(type="circle", x0=49.2, y0=49.2, x1=50.8, y1=50.8,
+                  fillcolor=lc, line=dict(color=lc, width=1))
+
+    # ── ÁREA DERECHA (arco rival, donde atacamos) ──
     fig.add_shape(type="rect", x0=83, y0=21.1, x1=100, y1=78.9,
                   line=dict(color=lc, width=2))
-    # Área chica derecha
     fig.add_shape(type="rect", x0=94, y0=36.8, x1=100, y1=63.2,
                   line=dict(color=lc, width=2))
-    # Portería derecha
-    fig.add_shape(type="rect", x0=100, y0=45.2, x1=102, y1=54.8,
-                  line=dict(color=lc, width=2), fillcolor="rgba(255,255,255,0.3)")
-    # Área grande izquierda
+    fig.add_shape(type="rect", x0=100, y0=45.2, x1=102.5, y1=54.8,
+                  line=dict(color=lc, width=2.5),
+                  fillcolor="rgba(255,255,255,0.15)")
+    # Semicírculo área derecha
+    fig.add_shape(type="circle", x0=77, y0=42, x1=89, y1=58,
+                  line=dict(color=lc, width=2))
+    # Punto penal derecho
+    fig.add_shape(type="circle", x0=88.7, y0=49.2, x1=89.3, y1=50.8,
+                  fillcolor=lc, line=dict(color=lc, width=1))
+
+    # ── ÁREA IZQUIERDA (arco propio) ──
     fig.add_shape(type="rect", x0=0, y0=21.1, x1=17, y1=78.9,
                   line=dict(color=lc, width=2))
     fig.add_shape(type="rect", x0=0, y0=36.8, x1=6, y1=63.2,
                   line=dict(color=lc, width=2))
-    # Portería izquierda
-    fig.add_shape(type="rect", x0=-2, y0=45.2, x1=0, y1=54.8,
-                  line=dict(color=lc, width=2), fillcolor="rgba(255,255,255,0.3)")
-    # Punto penal
-    fig.add_shape(type="circle", x0=88.5, y0=49.3, x1=89.5, y1=50.7,
-                  fillcolor=lc, line=dict(color=lc))
-    fig.add_shape(type="circle", x0=10.5, y0=49.3, x1=11.5, y1=50.7,
-                  fillcolor=lc, line=dict(color=lc))
-    fig.update_xaxes(range=[-3, 103], showgrid=False, visible=False)
-    fig.update_yaxes(range=[-3, 103], showgrid=False, visible=False)
+    fig.add_shape(type="rect", x0=-2.5, y0=45.2, x1=0, y1=54.8,
+                  line=dict(color=lc, width=2.5),
+                  fillcolor="rgba(255,255,255,0.15)")
+    # Semicírculo área izquierda
+    fig.add_shape(type="circle", x0=11, y0=42, x1=23, y1=58,
+                  line=dict(color=lc, width=2))
+    # Punto penal izquierdo
+    fig.add_shape(type="circle", x0=10.7, y0=49.2, x1=11.3, y1=50.8,
+                  fillcolor=lc, line=dict(color=lc, width=1))
+
+    # Esquinas
+    for x0, y0, x1, y1 in [(0,0,4,4), (0,96,4,100), (96,0,100,4), (96,96,100,100)]:
+        fig.add_shape(type="circle", x0=x0-2, y0=y0-2, x1=x1-2, y1=y1-2,
+                      line=dict(color=lc, width=1.5))
+
+    fig.update_xaxes(range=[-4, 104], showgrid=False, visible=False)
+    fig.update_yaxes(range=[-4, 104], showgrid=False, visible=False)
     return fig
 
 # ─────────────────────────────────────────────
