@@ -391,7 +391,7 @@ st.markdown("""
 <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1rem;">
 <div>
 <div style="font-family:'Bebas Neue',cursive;font-size:3.8rem;letter-spacing:4px;color:#00ff85;line-height:1;text-shadow:0 0 30px rgba(0,255,133,0.3);">Premier League ML Analytics</div>
-<div style="color:rgba(255,255,255,0.6);font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;margin-top:0.3rem;">Machine Learning I · Universidad Externado de Colombia · 2026</div>
+<div style="color:rgba(255,255,255,0.6);font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;margin-top:0.3rem;">Machine Learning I - Universidad Externado de Colombia - 2026</div>
 </div>
 </div>
 <div style="width:100%;border-radius:10px;overflow:hidden;margin-top:1rem;max-height:280px;">
