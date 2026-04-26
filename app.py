@@ -155,58 +155,60 @@ if 'show_dashboard' not in st.session_state:
     st.session_state.show_dashboard = False
 
 if not st.session_state.show_dashboard:
-    st.markdown("""
+    st.markdown(r"""
     <style>
     .main { background: #0a0012 !important; }
     #MainMenu, header, footer { visibility: hidden; }
     
-    @keyframes ball_move {{
-        0%   {{ left: -10%; top: 60%; transform: scale(0.8); }}
-        40%  {{ left: 55%;  top: 45%; transform: scale(1.0); }}
-        70%  {{ left: 80%;  top: 48%; transform: scale(0.9); }}
-        85%  {{ left: 88%;  top: 49%; transform: scale(0.7); }}
-        100% {{ left: 91%;  top: 49%; transform: scale(0.5); opacity: 0; }}
-    }}
-    @keyframes net_shake {{
-        0%,70%  {{ transform: skew(0deg); }}
-        75%      {{ transform: skew(-4deg) scaleX(1.04); }}
-        80%      {{ transform: skew(3deg) scaleX(0.97); }}
-        85%      {{ transform: skew(-2deg); }}
-        100%     {{ transform: skew(0deg); }}
-    }}
-    @keyframes goal_appear {{
-        0%,75%   {{ opacity: 0; transform: scale(0.3) rotate(-10deg); }}
-        80%      {{ opacity: 1; transform: scale(1.3) rotate(3deg); }}
-        90%      {{ transform: scale(0.95) rotate(-1deg); }}
-        100%     {{ opacity: 1; transform: scale(1) rotate(0deg); }}
-    }}
-    @keyframes title_appear {{
-        0%,85%  {{ opacity: 0; transform: translateY(30px); }}
-        100%    {{ opacity: 1; transform: translateY(0); }}
-    }}
-    @keyframes btn_appear {{
-        0%,90%  {{ opacity: 0; transform: translateY(20px); }}
-        100%    {{ opacity: 1; transform: translateY(0); }}
-    }}
-    @keyframes crowd_flash {{
-        0%,74%  {{ opacity: 0; }}
-        76%     {{ opacity: 0.6; }}
-        78%     {{ opacity: 0.1; }}
-        80%     {{ opacity: 0.7; }}
-        82%     {{ opacity: 0.2; }}
-        84%     {{ opacity: 0.5; }}
-        100%    {{ opacity: 0.15; }}
-    }}
-    @keyframes confetti_fall {{
-        0%   {{ transform: translateY(-20px) rotate(0deg); opacity: 0; }}
-        10%  {{ opacity: 1; }}
-        100% {{ transform: translateY(110vh) rotate(720deg); opacity: 0; }}
-    }}
-    @keyframes grass_lines {{
-        0%  {{ opacity: 0.3; }}
-        50% {{ opacity: 0.6; }}
-        100%{{ opacity: 0.3; }}
-    }}
+    @keyframes ball_move {
+        0%   { left: -10%; top: 60%; transform: scale(0.8); }
+        40%  { left: 55%;  top: 45%; transform: scale(1.0); }
+        70%  { left: 80%;  top: 48%; transform: scale(0.9); }
+        85%  { left: 88%;  top: 49%; transform: scale(0.7); }
+        100% { left: 91%;  top: 49%; transform: scale(0.5); opacity: 0; }
+    }
+    @keyframes net_shake {
+        0%,70%  { transform: skew(0deg); }
+        75%     { transform: skew(-4deg) scaleX(1.04); }
+        80%     { transform: skew(3deg) scaleX(0.97); }
+        85%     { transform: skew(-2deg); }
+        100%    { transform: skew(0deg); }
+    }
+    @keyframes goal_appear {
+        0%,75%  { opacity: 0; transform: scale(0.3) rotate(-10deg); }
+        80%     { opacity: 1; transform: scale(1.3) rotate(3deg); }
+        90%     { transform: scale(0.95) rotate(-1deg); }
+        100%    { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    @keyframes title_appear {
+        0%,85%  { opacity: 0; transform: translateY(30px); }
+        100%    { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes btn_appear {
+        0%,90%  { opacity: 0; transform: translateY(20px); }
+        100%    { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes crowd_flash {
+        0%,74%  { opacity: 0; }
+        76%     { opacity: 0.6; }
+        78%     { opacity: 0.1; }
+        80%     { opacity: 0.7; }
+        82%     { opacity: 0.2; }
+        84%     { opacity: 0.5; }
+        100%    { opacity: 0.15; }
+    }
+    @keyframes confetti_fall {
+        0%   { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+        10%  { opacity: 1; }
+        100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+    @keyframes grass_lines {
+        0%   { opacity: 0.3; }
+        50%  { opacity: 0.6; }
+        100% { opacity: 0.3; }
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     .welcome-container {
         position: fixed;
