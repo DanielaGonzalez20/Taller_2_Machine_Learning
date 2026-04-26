@@ -1,3 +1,4 @@
+import streamlit.components.v1 as components
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -134,6 +135,23 @@ html, body, [class*="css"] {
 }
 </style>
 """, unsafe_allow_html=True)
+
+# ── PANTALLA DE BIENVENIDA ──────────────────────────────
+if 'show_dashboard' not in st.session_state:
+    st.session_state.show_dashboard = False
+
+if not st.session_state.show_dashboard:
+    with open("welcome.html", "r", encoding="utf-8") as f:
+        html_content = f.read()
+    st.components.v1.html(html_content, height=600, scrolling=False)
+    st.markdown("<br>", unsafe_allow_html=True)
+    col = st.columns([1, 2, 1])[1]
+    with col:
+        if st.button("ENTRAR AL DASHBOARD", use_container_width=True, type="primary"):
+            st.session_state.show_dashboard = True
+            st.rerun()
+    st.stop()
+# ────────────────────────────────────────────────────────
 
 # ─────────────────────────────────────────────
 # CARGA DE DATOS REALES
