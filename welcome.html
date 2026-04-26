@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: linear-gradient(180deg, #0a0012 0%, #1a0030 50%, #0d1a00 100%);
+    overflow: hidden;
+    width: 100%;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Sans', sans-serif;
+    position: relative;
+}
+
+/* ── ANIMACIONES ── */
+@keyframes ball_move {
+    0%   { left: -8%;  bottom: 36%; transform: scale(0.9) rotate(0deg);   opacity: 1; }
+    30%  { left: 40%;  bottom: 40%; transform: scale(1.0) rotate(180deg); opacity: 1; }
+    60%  { left: 70%;  bottom: 38%; transform: scale(0.9) rotate(320deg); opacity: 1; }
+    80%  { left: 83%;  bottom: 37%; transform: scale(0.7) rotate(400deg); opacity: 1; }
+    90%  { left: 87%;  bottom: 37%; transform: scale(0.5) rotate(420deg); opacity: 0.5; }
+    100% { left: 89%;  bottom: 37%; transform: scale(0.3) rotate(440deg); opacity: 0; }
+}
+
+@keyframes net_shake {
+    0%,65%  { transform: skew(0deg) scaleX(1); }
+    70%     { transform: skew(-5deg) scaleX(1.05); }
+    75%     { transform: skew(4deg) scaleX(0.96); }
+    80%     { transform: skew(-3deg) scaleX(1.02); }
+    85%     { transform: skew(2deg) scaleX(0.99); }
+    90%,100%{ transform: skew(0deg) scaleX(1); }
+}
+
+@keyframes goal_appear {
+    0%,68%  { opacity: 0; transform: scale(0.2) rotate(-15deg); }
+    73%     { opacity: 1; transform: scale(1.4) rotate(4deg); }
+    78%     { transform: scale(0.9) rotate(-2deg); }
+    83%     { transform: scale(1.1) rotate(1deg); }
+    88%,100%{ opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes title_appear {
+    0%,75%  { opacity: 0; transform: translateY(25px); }
+    85%,100%{ opacity: 1; transform: translateY(0); }
+}
+
+@keyframes crowd_flash {
+    0%,64%  { opacity: 0; }
+    66%     { opacity: 0.8; }
+    68%     { opacity: 0.1; }
+    70%     { opacity: 0.9; }
+    72%     { opacity: 0.2; }
+    74%     { opacity: 0.6; }
+    76%     { opacity: 0.1; }
+    78%,100%{ opacity: 0.12; }
+}
+
+@keyframes confetti_fall {
+    0%   { transform: translateY(-30px) rotate(0deg) scale(1);   opacity: 0; }
+    8%   { opacity: 1; }
+    100% { transform: translateY(650px) rotate(720deg) scale(0.5); opacity: 0; }
+}
+
+@keyframes grass_pulse {
+    0%,100% { opacity: 0.25; }
+    50%     { opacity: 0.5; }
+}
+
+@keyframes glow_pulse {
+    0%,100% { text-shadow: 0 0 30px #00ff85, 0 0 60px #00ff85, 0 0 90px rgba(0,255,133,0.4); }
+    50%     { text-shadow: 0 0 50px #00ff85, 0 0 100px #00ff85, 0 0 150px rgba(0,255,133,0.7); }
+}
+
+@keyframes badge_bounce {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-6px); }
+}
+
+/* ── FONDO FLASH ── */
+.crowd-flash {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: radial-gradient(ellipse at 82% 55%, #00ff85 0%, transparent 55%);
+    animation: crowd_flash 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* ── CÉSPED ── */
+.grass {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 38%;
+    background: linear-gradient(180deg, #1e5c00 0%, #0d2900 100%);
+    z-index: 2;
+}
+.grass-stripe {
+    position: absolute;
+    top: 0; height: 100%; width: 10%;
+    background: rgba(255,255,255,0.04);
+    animation: grass_pulse 3s infinite;
+}
+
+/* Línea del área */
+.penalty-box {
+    position: absolute;
+    right: 8%;
+    bottom: 37%;
+    width: 120px;
+    height: 70px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-bottom: none;
+    z-index: 3;
+}
+
+/* ── ARCO ── */
+.goal-post {
+    position: absolute;
+    right: 7%;
+    bottom: 37%;
+    width: 110px;
+    height: 75px;
+    border: 5px solid #ffffff;
+    border-bottom: none;
+    border-radius: 3px 3px 0 0;
+    animation: net_shake 4s ease-in-out infinite;
+    z-index: 4;
+}
+.goal-net {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 1px,
+            transparent 1px, transparent 9px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.18) 1px,
+            transparent 1px, transparent 9px
+        );
+}
+.goal-post-left  { position: absolute; left: -5px; top: 0; width: 5px; height: 105%; background: white; }
+.goal-post-right { position: absolute; right: -5px; top: 0; width: 5px; height: 105%; background: white; }
+.goal-post-top   { position: absolute; top: -5px; left: -5px; right: -5px; height: 5px; background: white; }
+
+/* ── PELOTA ── */
+.ball {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 35% 30%, #ffffff 0%, #e8e8e8 30%, #aaaaaa 70%, #777 100%);
+    box-shadow:
+        2px 3px 10px rgba(0,0,0,0.6),
+        inset -3px -3px 8px rgba(0,0,0,0.3),
+        inset 2px 2px 5px rgba(255,255,255,0.5);
+    animation: ball_move 4s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+    z-index: 5;
+}
+/* Hexágonos de la pelota */
+.ball::before {
+    content: '';
+    position: absolute;
+    top: 30%; left: 30%;
+    width: 40%; height: 40%;
+    background: rgba(0,0,0,0.15);
+    border-radius: 50%;
+}
+
+/* ── CONFETTI ── */
+.confetti-piece {
+    position: absolute;
+    border-radius: 2px;
+    animation: confetti_fall linear infinite;
+    z-index: 6;
+}
+
+/* ── CONTENIDO CENTRAL ── */
+.content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 3rem;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(55, 0, 60, 0.8);
+    border: 1px solid #00ff85;
+    border-radius: 50px;
+    padding: 0.3rem 1rem;
+    margin-bottom: 0.8rem;
+    animation: badge_bounce 2s ease-in-out infinite;
+}
+.badge-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #00ff85;
+    box-shadow: 0 0 8px #00ff85;
+}
+.badge-text {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: #00ff85;
+    text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.goal-text {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(5rem, 15vw, 10rem);
+    color: #00ff85;
+    letter-spacing: 10px;
+    animation: goal_appear 4s ease-out infinite, glow_pulse 2s ease-in-out infinite;
+    line-height: 0.9;
+}
+
+.welcome-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    color: rgba(255,255,255,0.95);
+    letter-spacing: 5px;
+    animation: title_appear 4s ease-out infinite;
+}
+
+.welcome-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    animation: title_appear 4s ease-out infinite;
+}
+
+/* Línea decorativa */
+.divider {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00ff85, transparent);
+    margin: 0.5rem auto;
+    animation: title_appear 4s ease-out infinite;
+}
+
+/* Estadísticas rápidas */
+.stats-row {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    animation: title_appear 4s ease-out infinite;
+}
+.stat-item {
+    text-align: center;
+}
+.stat-value {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.8rem;
+    color: #00ff85;
+    letter-spacing: 2px;
+}
+.stat-label {
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<!-- Flash de fondo -->
+<div class="crowd-flash"></div>
+
+<!-- Confetti -->
+<div class="confetti-piece" style="left:5%;top:-5%;background:#00ff85;width:10px;height:10px;animation-duration:3.2s;animation-delay:2.7s;"></div>
+<div class="confetti-piece" style="left:15%;top:-5%;background:#ffffff;width:6px;height:14px;animation-duration:2.8s;animation-delay:2.9s;"></div>
+<div class="confetti-piece" style="left:25%;top:-5%;background:#37003c;width:10px;height:10px;animation-duration:3.5s;animation-delay:2.8s;"></div>
+<div class="confetti-piece" style="left:38%;top:-5%;background:#00ff85;width:8px;height:8px;border-radius:50%;animation-duration:3.0s;animation-delay:3.1s;"></div>
+<div class="confetti-piece" style="left:50%;top:-5%;background:#ff6b6b;width:12px;height:6px;animation-duration:2.6s;animation-delay:2.75s;"></div>
+<div class="confetti-piece" style="left:62%;top:-5%;background:#ffffff;width:8px;height:12px;animation-duration:3.3s;animation-delay:3.0s;"></div>
+<div class="confetti-piece" style="left:72%;top:-5%;background:#00ff85;width:10px;height:10px;animation-duration:2.9s;animation-delay:2.85s;"></div>
+<div class="confetti-piece" style="left:82%;top:-5%;background:#ffd700;width:8px;height:8px;border-radius:50%;animation-duration:3.1s;animation-delay:2.95s;"></div>
+<div class="confetti-piece" style="left:90%;top:-5%;background:#37003c;width:6px;height:16px;animation-duration:3.4s;animation-delay:3.05s;"></div>
+<div class="confetti-piece" style="left:96%;top:-5%;background:#00ff85;width:10px;height:6px;animation-duration:2.7s;animation-delay:2.8s;"></div>
+
+<!-- Césped -->
+<div class="grass">
+    <div class="grass-stripe" style="left:0%;animation-delay:0s;"></div>
+    <div class="grass-stripe" style="left:10%;animation-delay:0.3s;"></div>
+    <div class="grass-stripe" style="left:20%;animation-delay:0.6s;"></div>
+    <div class="grass-stripe" style="left:30%;animation-delay:0.9s;"></div>
+    <div class="grass-stripe" style="left:40%;animation-delay:1.2s;"></div>
+    <div class="grass-stripe" style="left:50%;animation-delay:1.5s;"></div>
+    <div class="grass-stripe" style="left:60%;animation-delay:1.8s;"></div>
+    <div class="grass-stripe" style="left:70%;animation-delay:2.1s;"></div>
+    <div class="grass-stripe" style="left:80%;animation-delay:2.4s;"></div>
+    <div class="grass-stripe" style="left:90%;animation-delay:2.7s;"></div>
+</div>
+
+<!-- Área penal -->
+<div class="penalty-box"></div>
+
+<!-- Arco -->
+<div class="goal-post">
+    <div class="goal-post-top"></div>
+    <div class="goal-post-left"></div>
+    <div class="goal-post-right"></div>
+    <div class="goal-net"></div>
+</div>
+
+<!-- Pelota -->
+<div class="ball"></div>
+
+<!-- Contenido principal -->
+<div class="content">
+    <div class="badge">
+        <div class="badge-dot"></div>
+        <span class="badge-text">Premier League 2025/26</span>
+    </div>
+
+    <div class="goal-text">GOAL!</div>
+
+    <div class="divider"></div>
+
+    <div class="welcome-title">Premier League ML Analytics</div>
+    <div class="welcome-sub">Machine Learning I &nbsp;·&nbsp; Universidad Externado de Colombia &nbsp;·&nbsp; 2026</div>
+
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-value">7,198</div>
+            <div class="stat-label">Tiros Analizados</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">291</div>
+            <div class="stat-label">Partidos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">807</div>
+            <div class="stat-label">Goles</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value">0.917</div>
+            <div class="stat-label">AUC-ROC xG</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
