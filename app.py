@@ -303,26 +303,46 @@ M = train_all_models(shots_final, matches)
 # ─────────────────────────────────────────────
 # HELPER: CANCHA
 # ─────────────────────────────────────────────
-def draw_pitch_opta(fig, bg="#0a1628"):
-    lc = "rgba(255,255,255,0.25)"
-    # Campo completo
+def draw_pitch_opta(fig, bg="#2d5a1b"):
+    lc = "rgba(255,255,255,0.9)"
+    # Fondo verde con franjas
+    for i in range(10):
+        color = "#2d5a1b" if i % 2 == 0 else "#347a20"
+        fig.add_shape(type="rect", 
+                      x0=i*10, y0=0, x1=(i+1)*10, y1=100,
+                      fillcolor=color, line=dict(width=0), layer="below")
+    # Borde campo
     fig.add_shape(type="rect", x0=0, y0=0, x1=100, y1=100,
-                  line=dict(color=lc, width=1.5), fillcolor=bg)
+                  line=dict(color=lc, width=2), fillcolor="rgba(0,0,0,0)")
     # Mediocampo
-    fig.add_shape(type="line", x0=50, y0=0, x1=50, y1=100, line=dict(color=lc, width=1.5))
-    fig.add_shape(type="circle", x0=41, y0=41, x1=59, y1=59, line=dict(color=lc, width=1.5))
+    fig.add_shape(type="line", x0=50, y0=0, x1=50, y1=100,
+                  line=dict(color=lc, width=2))
+    fig.add_shape(type="circle", x0=41, y0=41, x1=59, y1=59,
+                  line=dict(color=lc, width=2))
+    fig.add_shape(type="circle", x0=48, y0=48, x1=52, y1=52,
+                  line=dict(color=lc, width=2), fillcolor=lc)
     # Área grande derecha
-    fig.add_shape(type="rect", x0=83, y0=21.1, x1=100, y1=78.9, line=dict(color=lc, width=1.5))
+    fig.add_shape(type="rect", x0=83, y0=21.1, x1=100, y1=78.9,
+                  line=dict(color=lc, width=2))
     # Área chica derecha
-    fig.add_shape(type="rect", x0=94, y0=36.8, x1=100, y1=63.2, line=dict(color=lc, width=1.5))
+    fig.add_shape(type="rect", x0=94, y0=36.8, x1=100, y1=63.2,
+                  line=dict(color=lc, width=2))
     # Portería derecha
-    fig.add_shape(type="rect", x0=100, y0=45, x1=102, y1=55,
-                  line=dict(color=lc, width=1.5), fillcolor=lc)
+    fig.add_shape(type="rect", x0=100, y0=45.2, x1=102, y1=54.8,
+                  line=dict(color=lc, width=2), fillcolor="rgba(255,255,255,0.3)")
     # Área grande izquierda
-    fig.add_shape(type="rect", x0=0, y0=21.1, x1=17, y1=78.9, line=dict(color=lc, width=1.5))
-    fig.add_shape(type="rect", x0=0, y0=36.8, x1=6, y1=63.2, line=dict(color=lc, width=1.5))
-    fig.add_shape(type="rect", x0=-2, y0=45, x1=0, y1=55,
-                  line=dict(color=lc, width=1.5), fillcolor=lc)
+    fig.add_shape(type="rect", x0=0, y0=21.1, x1=17, y1=78.9,
+                  line=dict(color=lc, width=2))
+    fig.add_shape(type="rect", x0=0, y0=36.8, x1=6, y1=63.2,
+                  line=dict(color=lc, width=2))
+    # Portería izquierda
+    fig.add_shape(type="rect", x0=-2, y0=45.2, x1=0, y1=54.8,
+                  line=dict(color=lc, width=2), fillcolor="rgba(255,255,255,0.3)")
+    # Punto penal
+    fig.add_shape(type="circle", x0=88.5, y0=49.3, x1=89.5, y1=50.7,
+                  fillcolor=lc, line=dict(color=lc))
+    fig.add_shape(type="circle", x0=10.5, y0=49.3, x1=11.5, y1=50.7,
+                  fillcolor=lc, line=dict(color=lc))
     fig.update_xaxes(range=[-3, 103], showgrid=False, visible=False)
     fig.update_yaxes(range=[-3, 103], showgrid=False, visible=False)
     return fig
@@ -491,7 +511,9 @@ with tabs[1]:
     if filtro_equipo != "Todos":
         df_map = df_map[df_map['team_name'] == filtro_equipo]
 
-    df_map = df_map[df_map['x'].between(0, 100) & df_map['y'].between(0, 100)]
+    df_map = df_map[df_map['x'].notna() & df_map['y'].notna()]
+    df_map = df_map[(df_map['x'] >= 0) & (df_map['x'] <= 105) & 
+                     (df_map['y'] >= 0) & (df_map['y'] <= 100)]
 
     fig_map = px.scatter(
         df_map, x='x', y='y',
@@ -512,7 +534,7 @@ with tabs[1]:
     fig_map = draw_pitch_opta(fig_map, bg="#0a1628")
     fig_map.update_layout(
         paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='#0a1628',
+        plot_bgcolor='#2d5a1b',
         height=600,
         coloraxis_colorbar=dict(title='xG Predicho', tickfont=dict(color='#94a3b8')),
         font=dict(color='#94a3b8'),
@@ -881,7 +903,9 @@ with tabs[5]:
             use_container_width=True, hide_index=True)
 
     with col_k2:
-        df_plot = shots_final[shots_final['x'].between(0,100) & shots_final['y'].between(0,100)].copy()
+        df_plot = shots_final[shots_final['x'].notna() & shots_final['y'].notna()].copy()
+        df_plot = df_plot[(df_plot['x'] >= 0) & (df_plot['x'] <= 105) & 
+                           (df_plot['y'] >= 0) & (df_plot['y'] <= 100)]
         fig_km = px.scatter(
             df_plot, x='x', y='y',
             color='cluster',
