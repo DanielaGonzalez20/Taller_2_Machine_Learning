@@ -352,83 +352,25 @@ def draw_pitch_opta(fig, bg="#2d5a1b"):
 # HEADER
 # ─────────────────────────────────────────────
 st.markdown("""
-<div style="
-    background: linear-gradient(135deg, #37003c 0%, #1a0020 60%, #00ff85 200%);
-    border-radius: 16px;
-    padding: 0;
-    margin-bottom: 1.5rem;
-    overflow: hidden;
-    border: 2px solid #00ff85;
-    position: relative;
-">
-    <!-- Franja verde superior -->
-    <div style="background: #00ff85; height: 6px; width: 100%;"></div>
-    
-    <div style="padding: 2rem 3rem;">
-        <!-- Logo + Título -->
-        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem;">
-            <img src="https://raw.githubusercontent.com/DanielaGonzalez20/Taller_2_Machine_Learning/main/players.jpg"
-                 style="height: 80px; filter: brightness(0) invert(1);"
-                 onerror="this.style.display='none'">
-            <div>
-                <div style="
-                    font-family: 'Bebas Neue', cursive;
-                    font-size: 3.8rem;
-                    letter-spacing: 4px;
-                    color: #00ff85;
-                    line-height: 1;
-                    text-shadow: 0 0 30px rgba(0,255,133,0.3);
-                ">Premier League ML Analytics</div>
-                <div style="
-                    color: rgba(255,255,255,0.6);
-                    font-size: 0.85rem;
-                    letter-spacing: 3px;
-                    text-transform: uppercase;
-                    margin-top: 0.3rem;
-                ">Machine Learning I · Universidad Externado de Colombia · 2026</div>
-            </div>
-        </div>
-
-        <!-- Imagen de jugadores -->
-        <div style="
-            width: 100%;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 1rem;
-            max-height: 280px;
-        ">
-            <img src="https://i.imgur.com/placeholder.jpg"
-                 style="width: 100%; object-fit: cover; object-position: top;"
-                 onerror="this.style.display='none'">
-        </div>
-    </div>
-    
-    <!-- Franja verde inferior -->
-    <div style="background: #00ff85; height: 6px; width: 100%;"></div>
+<div style="background:linear-gradient(135deg,#37003c 0%,#1a0020 60%);border-radius:16px;padding:0;margin-bottom:1.5rem;overflow:hidden;border:2px solid #00ff85;">
+<div style="background:#00ff85;height:6px;width:100%;"></div>
+<div style="padding:2rem 3rem;">
+<div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1rem;">
+<div>
+<div style="font-family:'Bebas Neue',cursive;font-size:3.8rem;letter-spacing:4px;color:#00ff85;line-height:1;text-shadow:0 0 30px rgba(0,255,133,0.3);">Premier League ML Analytics</div>
+<div style="color:rgba(255,255,255,0.6);font-size:0.85rem;letter-spacing:3px;text-transform:uppercase;margin-top:0.3rem;">Machine Learning I · Universidad Externado de Colombia · 2026</div>
+</div>
+</div>
+<div style="width:100%;border-radius:10px;overflow:hidden;margin-top:1rem;max-height:280px;">
+<img src="https://raw.githubusercontent.com/DanielaGonzalez20/Taller_2_Machine_Learning/main/players.jpg" style="width:100%;object-fit:cover;object-position:top;">
+</div>
+</div>
+<div style="background:#00ff85;height:6px;width:100%;"></div>
 </div>
 """, unsafe_allow_html=True)
 
-# KPIs globales
+# LO QUE SIGUE DESPUÉS QUEDA IGUAL (los KPIs):
 k1, k2, k3, k4, k5 = st.columns(5)
-total_shots = len(shots_final)
-total_goals_shots = shots_final['is_goal'].sum()
-conv_rate = total_goals_shots / total_shots * 100
-auc_xg = roc_auc_score(M['y_te'], M['y_prob_xg'])
-acc_match = M['acc_cv'].mean()
-
-with k1:
-    st.markdown(f"<div class='kpi-card'><div class='kpi-value'>{total_shots:,}</div><div class='kpi-label'>Tiros Analizados</div></div>", unsafe_allow_html=True)
-with k2:
-    st.markdown(f"<div class='kpi-card'><div class='kpi-value'>{total_goals_shots:,}</div><div class='kpi-label'>Goles Registrados</div></div>", unsafe_allow_html=True)
-with k3:
-    st.markdown(f"<div class='kpi-card'><div class='kpi-value'>{conv_rate:.1f}%</div><div class='kpi-label'>Tasa Conversión</div></div>", unsafe_allow_html=True)
-with k4:
-    st.markdown(f"<div class='kpi-card'><div class='kpi-value'>{auc_xg:.3f}</div><div class='kpi-label'>AUC-ROC Modelo xG</div></div>", unsafe_allow_html=True)
-with k5:
-    color = "#4ade80" if acc_match > 0.498 else "#f87171"
-    st.markdown(f"<div class='kpi-card'><div class='kpi-value' style='color:{color}'>{acc_match*100:.1f}%</div><div class='kpi-label'>Accuracy vs Bet365 (49.8%)</div></div>", unsafe_allow_html=True)
-
-st.markdown("---")
 
 # ─────────────────────────────────────────────
 # TABS
