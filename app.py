@@ -367,7 +367,7 @@ st.markdown("""
     <div style="padding: 2rem 3rem;">
         <!-- Logo + Título -->
         <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem;">
-            <img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg"
+            <img src="https://raw.githubusercontent.com/DanielaGonzalez20/Taller_2_Machine_Learning/main/players.jpg"
                  style="height: 80px; filter: brightness(0) invert(1);"
                  onerror="this.style.display='none'">
             <div>
