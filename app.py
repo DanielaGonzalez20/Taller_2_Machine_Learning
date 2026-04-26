@@ -272,7 +272,7 @@ def train_all_models(shots_df, matches_df):
     X_log = matches_df[feat_match].dropna()
     y_log = matches_df.loc[X_log.index, 'ftr']
 
-    log_match = LogisticRegression(multi_class='multinomial', max_iter=2000)
+    log_match = LogisticRegression(solver='lbfgs', max_iter=2000)
     acc_cv = cross_val_score(log_match, X_log, y_log, cv=5)
     y_pred_match = cross_val_predict(log_match, X_log, y_log, cv=5)
     log_match.fit(X_log, y_log)
