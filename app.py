@@ -390,39 +390,39 @@ tabs = st.tabs([
 # ═══════════════════════════════════════════════
 with tabs[0]:
     st.markdown("<div class='section-title'>Análisis Exploratorio de Datos</div>", unsafe_allow_html=True)
-  st.markdown(r"""
- <div style="background:linear-gradient(135deg,#37003c,#1a0020);border:1px solid #00ff85;border-radius:12px;padding:1.5rem 2rem;margin-bottom:1.5rem;">
-<div style="font-family:'Bebas Neue',cursive;font-size:1.3rem;color:#00ff85;letter-spacing:3px;margin-bottom:0.8rem;">CONTEXTO DEL PROYECTO</div>
-<p style="color:#94a3b8;font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">
-La Premier League 2025/26 genera más de <b style="color:white;">444,000 eventos</b> por temporada. 
-Cada tiro, pase y tackle queda registrado con coordenadas precisas en una cancha normalizada de 100x100.
-Las casas de apuestas como Bet365 invierten millones en modelos predictivos y aciertan el 
-<b style="color:#00ff85;">49.8%</b> de los partidos.
-</p>
-<p style="color:#94a3b8;font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">
-<b style="color:white;">Nuestra misión:</b> construir un pipeline completo de Machine Learning que intente superar ese benchmark 
-usando datos reales de <b style="color:white;">7,198 tiros</b> y <b style="color:white;">291 partidos</b> de la temporada actual.
-</p>
-<div style="display:flex;gap:2rem;margin-top:1rem;flex-wrap:wrap;">
-    <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
-        <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Modelo 1</div>
-        <div style="color:#94a3b8;font-size:0.8rem;">xG - Expected Goals (Reg. Logística)</div>
+    st.markdown(r"""
+    <div style="background:linear-gradient(135deg,#37003c,#1a0020);border:1px solid #00ff85;border-radius:12px;padding:1.5rem 2rem;margin-bottom:1.5rem;">
+    <div style="font-family:'Bebas Neue',cursive;font-size:1.3rem;color:#00ff85;letter-spacing:3px;margin-bottom:0.8rem;">CONTEXTO DEL PROYECTO</div>
+    <p style="color:#94a3b8;font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">
+    La Premier League 2025/26 genera más de <b style="color:white;">444,000 eventos</b> por temporada. 
+    Cada tiro, pase y tackle queda registrado con coordenadas precisas en una cancha normalizada de 100x100.
+    Las casas de apuestas como Bet365 invierten millones en modelos predictivos y aciertan el 
+    <b style="color:#00ff85;">49.8%</b> de los partidos.
+    </p>
+    <p style="color:#94a3b8;font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">
+    <b style="color:white;">Nuestra misión:</b> construir un pipeline completo de Machine Learning que intente superar ese benchmark 
+    usando datos reales de <b style="color:white;">7,198 tiros</b> y <b style="color:white;">291 partidos</b> de la temporada actual.
+    </p>
+    <div style="display:flex;gap:2rem;margin-top:1rem;flex-wrap:wrap;">
+         <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
+              <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Modelo 1</div>
+              <div style="color:#94a3b8;font-size:0.8rem;">xG - Expected Goals (Reg. Logística)</div>
+         </div>
+         <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
+              <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Modelo 2A</div>
+              <div style="color:#94a3b8;font-size:0.8rem;">Goles Totales (Ridge L2)</div>
+         </div>
+         <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
+              <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Modelo 2B</div>
+              <div style="color:#94a3b8;font-size:0.8rem;">Resultado H/D/A (Reg. Logística Multinomial)</div>
+         </div>
+         <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
+              <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Bonus</div>
+              <div style="color:#94a3b8;font-size:0.8rem;">Random Forest + XGBoost + K-Means</div>
+         </div>
     </div>
-    <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
-        <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Modelo 2A</div>
-        <div style="color:#94a3b8;font-size:0.8rem;">Goles Totales (Ridge L2)</div>
     </div>
-    <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
-        <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Modelo 2B</div>
-        <div style="color:#94a3b8;font-size:0.8rem;">Resultado H/D/A (Reg. Logística Multinomial)</div>
-    </div>
-    <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
-        <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Bonus</div>
-        <div style="color:#94a3b8;font-size:0.8rem;">Random Forest + XGBoost + K-Means</div>
-    </div>
-</div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
