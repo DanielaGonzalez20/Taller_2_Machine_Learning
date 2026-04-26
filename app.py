@@ -351,8 +351,62 @@ def draw_pitch_opta(fig, bg="#2d5a1b"):
 # ─────────────────────────────────────────────
 # HEADER
 # ─────────────────────────────────────────────
-st.markdown("<div class='hero-title'>Premier League ML Analytics</div>", unsafe_allow_html=True)
-st.markdown("<div class='hero-sub'>Machine Learning I — Universidad Externado de Colombia · 2026</div>", unsafe_allow_html=True)
+st.markdown("""
+<div style="
+    background: linear-gradient(135deg, #37003c 0%, #1a0020 60%, #00ff85 200%);
+    border-radius: 16px;
+    padding: 0;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    border: 2px solid #00ff85;
+    position: relative;
+">
+    <!-- Franja verde superior -->
+    <div style="background: #00ff85; height: 6px; width: 100%;"></div>
+    
+    <div style="padding: 2rem 3rem;">
+        <!-- Logo + Título -->
+        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem;">
+            <img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg"
+                 style="height: 80px; filter: brightness(0) invert(1);"
+                 onerror="this.style.display='none'">
+            <div>
+                <div style="
+                    font-family: 'Bebas Neue', cursive;
+                    font-size: 3.8rem;
+                    letter-spacing: 4px;
+                    color: #00ff85;
+                    line-height: 1;
+                    text-shadow: 0 0 30px rgba(0,255,133,0.3);
+                ">Premier League ML Analytics</div>
+                <div style="
+                    color: rgba(255,255,255,0.6);
+                    font-size: 0.85rem;
+                    letter-spacing: 3px;
+                    text-transform: uppercase;
+                    margin-top: 0.3rem;
+                ">Machine Learning I · Universidad Externado de Colombia · 2026</div>
+            </div>
+        </div>
+
+        <!-- Imagen de jugadores -->
+        <div style="
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1rem;
+            max-height: 280px;
+        ">
+            <img src="https://i.imgur.com/placeholder.jpg"
+                 style="width: 100%; object-fit: cover; object-position: top;"
+                 onerror="this.style.display='none'">
+        </div>
+    </div>
+    
+    <!-- Franja verde inferior -->
+    <div style="background: #00ff85; height: 6px; width: 100%;"></div>
+</div>
+""", unsafe_allow_html=True)
 
 # KPIs globales
 k1, k2, k3, k4, k5 = st.columns(5)
