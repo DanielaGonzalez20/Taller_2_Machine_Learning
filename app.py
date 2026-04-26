@@ -390,8 +390,8 @@ tabs = st.tabs([
 # ═══════════════════════════════════════════════
 with tabs[0]:
     st.markdown("<div class='section-title'>Análisis Exploratorio de Datos</div>", unsafe_allow_html=True)
-  st.markdown("""
-<div style="background:linear-gradient(135deg,#37003c,#1a0020);border:1px solid #00ff85;border-radius:12px;padding:1.5rem 2rem;margin-bottom:1.5rem;">
+  st.markdown(r"""
+ <div style="background:linear-gradient(135deg,#37003c,#1a0020);border:1px solid #00ff85;border-radius:12px;padding:1.5rem 2rem;margin-bottom:1.5rem;">
 <div style="font-family:'Bebas Neue',cursive;font-size:1.3rem;color:#00ff85;letter-spacing:3px;margin-bottom:0.8rem;">CONTEXTO DEL PROYECTO</div>
 <p style="color:#94a3b8;font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">
 La Premier League 2025/26 genera más de <b style="color:white;">444,000 eventos</b> por temporada. 
