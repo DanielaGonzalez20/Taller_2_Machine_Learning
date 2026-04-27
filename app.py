@@ -488,18 +488,23 @@ with tabs[0]:
 
         fig3 = go.Figure()
         fig3.add_bar(x=tiempo_stats['intervalo'].astype(str), y=tiempo_stats['count'],
-                     name='Tiros', marker_color='#1e3a5f', yaxis='y')
-        fig3.add_scatter(x=tiempo_stats['intervalo'].astype(str), y=tiempo_stats['Conversión (%)'],
-                         name='Conversión %', line=dict(color='#f472b6', width=3),
-                         marker=dict(size=8), yaxis='y2', mode='lines+markers')
+                     name='Tiros', marker_color='#37003c', yaxis='y')
+        fig3.add_scatter(x=tiempo_stats['intervalo'].astype(str), y=tiempo_stats['Conversion (%)'],
+                         name='Conversion %', line=dict(color='#00ff85', width=3),
+                         marker=dict(size=10, color='#00ff85',
+                                     line=dict(color='white', width=2)),
+                         yaxis='y2', mode='lines+markers')
         fig3.update_layout(
             title='Volumen vs Efectividad por Intervalo',
+            title_font=dict(color='#00ff85', size=14),
             paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color='white'),
-            title_font=dict(color='#00ff85'),
-            yaxis=dict(title='Tiros', color='#94a3b8'),
-            yaxis2=dict(title='Conversion (%)', overlaying='y', side='right', color='#00ff85'),
-            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white'))
+            yaxis=dict(title='Tiros', color='white',
+                       gridcolor='rgba(255,255,255,0.08)'),
+            yaxis2=dict(title='Conversion (%)', overlaying='y',
+                        side='right', color='#00ff85'),
+            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white')),
+            bargap=0.3
         )
         st.plotly_chart(fig3, use_container_width=True)
         st.markdown("<div class='insight-box'>El minuto <b>90+</b> tiene la mayor conversión (>13%) con el menor volumen — fatiga defensiva. Justifica <code>is_final_minutes</code> como feature.</div>", unsafe_allow_html=True)
@@ -524,14 +529,50 @@ with tabs[0]:
 
     # Top goleadores
     st.markdown("<div class='section-title'>Top Goleadores</div>", unsafe_allow_html=True)
-    top10 = players.nlargest(10, 'goals_scored')[['web_name','team','position','goals_scored','xG']].copy()
+    top10 = players.nlargest(10, 'goals_scored')[
+        ['web_name','team','position','goals_scored','xG']].copy()
     top10['xG'] = pd.to_numeric(top10['xG'], errors='coerce').round(2)
     top10['Diferencia xG'] = (top10['goals_scored'] - top10['xG']).round(2)
-    st.dataframe(
-        top10.rename(columns={'web_name':'Jugador','team':'Equipo','position':'Posición',
-                               'goals_scored':'Goles','xG':'xG Esperado'}),
-        use_container_width=True, hide_index=True
-    )
+    top10 = top10.rename(columns={
+        'web_name': 'Jugador', 'team': 'Equipo',
+        'position': 'Posicion', 'goals_scored': 'Goles',
+        'xG': 'xG Esperado'
+    })
+
+    # Colorear diferencia xG
+    def color_diff(val):
+        if val > 0:
+            return 'color: #00ff85; font-weight: bold'
+        elif val < 0:
+            return 'color: #f87171; font-weight: bold'
+        return 'color: white'
+
+    styled = top10.style\
+        .applymap(color_diff, subset=['Diferencia xG'])\
+        .set_properties(**{
+            'background-color': '#0a0012',
+            'color': 'white',
+            'border-color': '#37003c'
+        })\
+        .set_table_styles([
+            {'selector': 'th', 'props': [
+                ('background-color', '#37003c'),
+                ('color', '#00ff85'),
+                ('font-weight', 'bold'),
+                ('letter-spacing', '1px'),
+                ('border', '1px solid #00ff85'),
+                ('padding', '8px 12px')
+            ]},
+            {'selector': 'td', 'props': [
+                ('border', '1px solid rgba(0,255,133,0.15)'),
+                ('padding', '8px 12px')
+            ]},
+            {'selector': 'tr:hover td', 'props': [
+                ('background-color', 'rgba(0,255,133,0.08)')
+            ]}
+        ])
+
+    st.write(styled.to_html(), unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════
 # TAB 2: SHOT MAP
