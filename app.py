@@ -39,17 +39,17 @@ html, body, [class*="css"] {
 
 .hero-title {
     font-family: 'Bebas Neue', cursive;
-    font-size: clamp(1.8rem, 5vw, 4rem);
-    letter-spacing: 3px;
+    font-size: clamp(1.5rem, 4vw, 3.5rem);
+    letter-spacing: 2px;
     background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #f472b6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
     margin-bottom: 0.2rem;
-    line-height: 1.1;
-    white-space: nowrap;
-    overflow: visible;
-    width: 100%;
+    line-height: 1.2;
+    padding: 0 1rem;
+    word-break: keep-all;
+    white-space: normal;
 }
 .hero-sub {
     text-align: center;
