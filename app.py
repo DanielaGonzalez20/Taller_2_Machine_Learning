@@ -1153,6 +1153,165 @@ with tabs[3]:
         st.warning("No hay suficiente historial para estos equipos. Se necesitan al menos 2 partidos previos.")
 
 # ═══════════════════════════════════════════════
+# TAB 4: MATCH PREDICTOR
+# ═══════════════════════════════════════════════
+with tabs[3]:
+    st.markdown("<div class='section-title'>Match Predictor — Quien Gana?</div>", unsafe_allow_html=True)
+
+    # Texto introductorio
+    st.markdown(
+        "<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+        "border:1px solid #00ff85;border-radius:12px;padding:1.2rem 1.8rem;"
+        "margin-bottom:1.5rem;'>"
+        "<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1.1rem;"
+        "letter-spacing:3px;margin-bottom:0.6rem;'>COMO FUNCIONA EL MATCH PREDICTOR?</div>"
+        "<p style='color:#94a3b8;font-size:0.9rem;line-height:1.7;margin-bottom:0.5rem;'>"
+        "El predictor usa dos modelos complementarios entrenados con datos reales de la Premier League 2025/26:"
+        "</p>"
+        "<div style='display:flex;gap:1rem;flex-wrap:wrap;'>"
+        "<div style='flex:1;min-width:200px;background:rgba(0,255,133,0.05);"
+        "border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.8rem;'>"
+        "<div style='color:#00ff85;font-family:Bebas Neue,cursive;font-size:0.9rem;"
+        "letter-spacing:1px;margin-bottom:0.3rem;'>MODELO 2B — RESULTADO H/D/A</div>"
+        "<div style='color:#94a3b8;font-size:0.8rem;line-height:1.5;'>"
+        "Regresion Logistica Multinomial entrenada con odds de Bet365 y probabilidades "
+        "implicitas. Predice la probabilidad de Victoria Local, Empate o Victoria Visitante. "
+        "<b style='color:white;'>Accuracy: ~50% vs Bet365: 49.8%</b>"
+        "</div>"
+        "</div>"
+        "<div style='flex:1;min-width:200px;background:rgba(129,140,248,0.05);"
+        "border:1px solid rgba(129,140,248,0.2);border-radius:8px;padding:0.8rem;'>"
+        "<div style='color:#818cf8;font-family:Bebas Neue,cursive;font-size:0.9rem;"
+        "letter-spacing:1px;margin-bottom:0.3rem;'>MODELO 2A — GOLES TOTALES</div>"
+        "<div style='color:#94a3b8;font-size:0.8rem;line-height:1.5;'>"
+        "Regresion Ridge (L2) que combina el historial de goles de los ultimos 5 partidos "
+        "de cada equipo con las odds de Bet365. Predice el total de goles esperados. "
+        "<b style='color:white;'>Principio de Dixon-Coles (1997)</b>"
+        "</div>"
+        "</div>"
+        "</div>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    col_a, col_b = st.columns(2)
+    with col_a:
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;letter-spacing:2px;margin-bottom:0.5rem;'>CUOTAS BET365 PRE-PARTIDO</div>", unsafe_allow_html=True)
+        cuota_h = st.number_input("Cuota Victoria Local (H)", min_value=1.01, max_value=20.0, value=2.10, step=0.05)
+        cuota_d = st.number_input("Cuota Empate (D)", min_value=1.01, max_value=20.0, value=3.40, step=0.05)
+        cuota_a = st.number_input("Cuota Victoria Visitante (A)", min_value=1.01, max_value=20.0, value=3.60, step=0.05)
+
+        inv_h, inv_d, inv_a = 1/cuota_h, 1/cuota_d, 1/cuota_a
+        total_inv = inv_h + inv_d + inv_a
+        imp_h = inv_h / total_inv
+        imp_d = inv_d / total_inv
+        imp_a = inv_a / total_inv
+
+        X_match_pred = pd.DataFrame([[cuota_h, cuota_d, cuota_a, imp_h, imp_d, imp_a]],
+                                     columns=M['feat_match'])
+        probs = M['log_match'].predict_proba(X_match_pred)[0]
+        classes = M['log_match'].classes_
+        prob_dict = dict(zip(classes, probs))
+
+        pred_result = classes[np.argmax(probs)]
+        resultado_labels = {'H': 'Victoria Local', 'D': 'Empate', 'A': 'Victoria Visitante'}
+
+        # Nota metodologica
+        st.markdown(
+            "<div class='insight-box' style='margin-top:1rem;font-size:0.8rem;'>"
+            "Las cuotas se convierten en <b>probabilidades implicitas</b> (1/cuota normalizada) "
+            "eliminando el margen de la casa de apuestas. Estas son las features del modelo."
+            "</div>",
+            unsafe_allow_html=True
+        )
+
+    with col_b:
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;letter-spacing:2px;margin-bottom:0.5rem;'>PREDICCION DEL MODELO</div>", unsafe_allow_html=True)
+        color_pred = '#00ff85' if pred_result == 'H' else '#64748b' if pred_result == 'D' else '#818cf8'
+        st.markdown(
+            f"<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+            f"border:2px solid {color_pred};border-radius:12px;padding:1.5rem;"
+            f"text-align:center;margin-bottom:1rem;'>"
+            f"<div style='font-size:0.7rem;letter-spacing:2px;color:#64748b;'>RESULTADO PREDICHO</div>"
+            f"<div style='font-family:Bebas Neue;font-size:2.5rem;color:{color_pred};"
+            f"margin:0.5rem 0;'>{resultado_labels.get(pred_result, pred_result)}</div>"
+            f"<div style='color:#94a3b8;font-size:0.9rem;'>Confianza: {max(probs)*100:.1f}%</div>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+
+        labels_map = {'H': 'Local', 'D': 'Empate', 'A': 'Visitante'}
+        colors_map = {'H': '#00ff85', 'D': '#64748b', 'A': '#818cf8'}
+
+        for cls in ['H', 'D', 'A']:
+            p = prob_dict.get(cls, 0)
+            st.markdown(
+                f"<div style='margin:0.3rem 0;'>"
+                f"<div style='display:flex;justify-content:space-between;"
+                f"font-size:0.85rem;color:#94a3b8;'>"
+                f"<span>{labels_map[cls]}</span><span>{p*100:.1f}%</span></div>"
+                f"<div style='background:#1e293b;border-radius:4px;height:8px;margin-top:3px;'>"
+                f"<div style='background:{colors_map[cls]};width:{p*100:.1f}%;"
+                f"height:8px;border-radius:4px;'></div>"
+                f"</div></div>",
+                unsafe_allow_html=True
+            )
+
+    # Goles esperados
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;letter-spacing:2px;margin-bottom:0.5rem;'>GOLES ESPERADOS (MODELO RIDGE + HISTORIAL)</div>", unsafe_allow_html=True)
+
+    ms = M['matches_sorted']
+    equipos = sorted(matches['home_team'].dropna().unique())
+
+    col_eq1, col_eq2 = st.columns(2)
+    with col_eq1:
+        equipo_local = st.selectbox("Equipo Local", equipos, index=0)
+    with col_eq2:
+        equipo_visit = st.selectbox("Equipo Visitante", equipos, index=1)
+
+    hist_local = ms[ms['home_team'] == equipo_local][['home_avg_scored','home_avg_conceded']].dropna().tail(1)
+    hist_visit = ms[ms['away_team'] == equipo_visit][['away_avg_scored','away_avg_conceded']].dropna().tail(1)
+
+    if not hist_local.empty and not hist_visit.empty:
+        hs = hist_local['home_avg_scored'].values[0]
+        hc = hist_local['home_avg_conceded'].values[0]
+        as_ = hist_visit['away_avg_scored'].values[0]
+        ac = hist_visit['away_avg_conceded'].values[0]
+        ataque_h = hs + ac
+        ataque_a = as_ + hc
+        over_proxy = 1/cuota_h + 1/cuota_a
+
+        X_goles_pred = pd.DataFrame(
+            [[hs, hc, as_, ac, ataque_h, ataque_a, over_proxy, cuota_h, cuota_d, cuota_a]],
+            columns=M['feat_goles']
+        )
+        goles_pred = M['ridge'].predict(X_goles_pred)[0]
+
+        g1, g2, g3 = st.columns(3)
+        with g1:
+            st.metric("Goles Esperados Totales", f"{goles_pred:.2f}")
+        with g2:
+            st.metric(f"Forma ofensiva {equipo_local}", f"{hs:.2f} goles/partido")
+        with g3:
+            st.metric(f"Forma ofensiva {equipo_visit}", f"{as_:.2f} goles/partido")
+
+        st.markdown(
+            "<div class='insight-box' style='margin-top:0.8rem;'>"
+            "<b style='color:#00ff85;'>Como se calcula:</b> "
+            "El modelo Ridge combina el promedio de goles marcados y recibidos por cada equipo "
+            "en sus ultimas 5 jornadas con las odds de Bet365. "
+            "La logica es del principio de Dixon-Coles: "
+            "<b style='color:white;'>goles esperados = ataque propio + vulnerabilidad defensiva rival</b>. "
+            "Un R2 bajo es esperable — predecir goles exactos en futbol es extremadamente dificil "
+            "incluso para los mejores modelos del mundo."
+            "</div>",
+            unsafe_allow_html=True
+        )
+    else:
+        st.warning("No hay suficiente historial para estos equipos. Se necesitan al menos 2 partidos previos.")
+
+# ═══════════════════════════════════════════════
 # TAB 5: PERFORMANCE
 # ═══════════════════════════════════════════════
 with tabs[4]:
