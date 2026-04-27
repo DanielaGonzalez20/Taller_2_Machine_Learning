@@ -71,7 +71,6 @@ El modelo utiliza variables geométricas, contextuales, técnicas y espaciales p
 
 - **`goal_mouth_z`** *(opcional)*  
   Altura del disparo dentro del arco.
-* **Binarias/Categóricas:** `Is_Big_Chance` (Ocasión inmejorable), `Is_Header` (Remate de cabeza).
 
 ## 4. Instrucciones para Ejecutar el Notebook y Dashboard localmente 
 
