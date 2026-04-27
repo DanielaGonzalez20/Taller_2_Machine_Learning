@@ -551,7 +551,7 @@ def color_diff(val):
             return 'color: #f87171; font-weight: bold'
         return 'color: white'
 
- styled = top10.style\
+styled = top10.style\
         .map(color_diff, subset=['Diferencia xG'])\
         .format({'xG Esperado': '{:.2f}', 'Diferencia xG': '{:.2f}'})\
         .hide(axis='index')\
