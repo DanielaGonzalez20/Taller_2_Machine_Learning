@@ -507,7 +507,7 @@ with tabs[0]:
             yaxis=dict(title='Tiros', color='white',
                        gridcolor='rgba(255,255,255,0.08)'),
             yaxis2=dict(title='Conversion (%)', overlaying='y',
-                        side='right', color='#00ff85'),
+                        side='right', color='white'),
             legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white')),
             bargap=0.3
         )
