@@ -1089,79 +1089,81 @@ with tabs[5]:
 
         mejor_k = list(k_range)[siluetas.index(max(siluetas))]
 
-        fig_elbow = go.Figure()
-        fig_elbow.add_trace(go.Scatter(
-            x=list(k_range), y=inercias,
-            mode='lines+markers',
-            name='Inercia (Elbow)',
-            line=dict(color='#00ff85', width=2),
-            marker=dict(size=8, color='#00ff85'),
-            yaxis='y'
-        ))
-        fig_elbow.add_trace(go.Scatter(
-            x=list(k_range), y=siluetas,
-            mode='lines+markers',
-            name='Silueta',
-            line=dict(color='#f472b6', width=2),
-            marker=dict(size=8, color='#f472b6'),
-            yaxis='y2'
-        ))
-        fig_elbow.add_vline(
-            x=mejor_k,
-            line=dict(color='#facc15', width=2, dash='dash')
-        )
-        fig_elbow.update_layout(
-            title=f'Mejor K = {mejor_k} (linea amarilla)',
-            title_font=dict(color='#00ff85', size=12),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white'),
-            height=250,
-            yaxis=dict(title='Inercia', color='#00ff85',
-                       gridcolor='rgba(255,255,255,0.08)'),
-            yaxis2=dict(title='Silueta', overlaying='y',
-                        side='right', color='#f472b6'),
-            legend=dict(bgcolor='rgba(0,0,0,0)',
-                        font=dict(color='white', size=10)),
-            margin=dict(t=30, b=10, l=0, r=0)
-        )
-        st.plotly_chart(fig_elbow, use_container_width=True)
+        # Fila: gráfica elbow + tarjetas al lado
+        col_elbow, col_cards = st.columns([1.2, 1])
 
-        st.markdown(
-            f"<div class='insight-box'>"
-            f"El <b style='color:#facc15;'>K={mejor_k}</b> es el optimo segun el "
-            f"coeficiente de silueta ({max(siluetas):.3f}). "
-            f"Valores de silueta cercanos a 1 indican clusters bien separados. "
-            f"El metodo del codo (inercia) confirma que agregar mas clusters "
-            f"despues de K={mejor_k} aporta poca mejora."
-            f"</div>", unsafe_allow_html=True)
+        with col_elbow:
+            fig_elbow = go.Figure()
+            fig_elbow.add_trace(go.Scatter(
+                x=list(k_range), y=inercias,
+                mode='lines+markers',
+                name='Inercia (Elbow)',
+                line=dict(color='#00ff85', width=2),
+                marker=dict(size=8, color='#00ff85'),
+                yaxis='y'
+            ))
+            fig_elbow.add_trace(go.Scatter(
+                x=list(k_range), y=siluetas,
+                mode='lines+markers',
+                name='Silueta',
+                line=dict(color='#f472b6', width=2),
+                marker=dict(size=8, color='#f472b6'),
+                yaxis='y2'
+            ))
+            fig_elbow.add_vline(
+                x=mejor_k,
+                line=dict(color='#facc15', width=2, dash='dash')
+            )
+            fig_elbow.update_layout(
+                title=f'Mejor K = {mejor_k} (linea amarilla)',
+                title_font=dict(color='#00ff85', size=12),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                height=250,
+                yaxis=dict(title='Inercia', color='#00ff85',
+                           gridcolor='rgba(255,255,255,0.08)'),
+                yaxis2=dict(title='Silueta', overlaying='y',
+                            side='right', color='#f472b6'),
+                legend=dict(bgcolor='rgba(0,0,0,0)',
+                            font=dict(color='white', size=10)),
+                margin=dict(t=30, b=10, l=0, r=0)
+            )
+            st.plotly_chart(fig_elbow, use_container_width=True)
+            st.markdown(
+                f"<div class='insight-box'>"
+                f"El <b style='color:#facc15;'>K={mejor_k}</b> es el optimo segun el "
+                f"coeficiente de silueta ({max(siluetas):.3f}). "
+                f"El metodo del codo confirma que agregar mas clusters "
+                f"despues de K={mejor_k} aporta poca mejora."
+                f"</div>", unsafe_allow_html=True)
 
-        # --- TARJETAS DE INTERPRETACION (debajo del elbow) ---
-        if k == 3:
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.95rem;letter-spacing:2px;margin-bottom:0.6rem;'>INTERPRETACION K=3</div>", unsafe_allow_html=True)
-
-            st.markdown("""
-<div style='display:flex;gap:0.5rem;width:100%;'>
-    <div style='flex:1;background:linear-gradient(135deg,#37003c,#1a0020);border-left:4px solid #00ff85;border-radius:0 8px 8px 0;padding:0.7rem 0.8rem;'>
-        <div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.8rem;letter-spacing:1px;'>C0 — Tiros Lejanos</div>
-        <div style='color:#94a3b8;font-size:0.7rem;line-height:1.4;margin:0.2rem 0;'>Larga distancia, angulo cerrado. Minima peligrosidad.</div>
-        <div style='color:#00ff85;font-size:0.68rem;font-weight:bold;'>~27m | ~20 | ~6%</div>
-    </div>
-    <div style='flex:1;background:linear-gradient(135deg,#37003c,#1a0020);border-left:4px solid #818cf8;border-radius:0 8px 8px 0;padding:0.7rem 0.8rem;'>
-        <div style='font-family:Bebas Neue,cursive;color:#818cf8;font-size:0.8rem;letter-spacing:1px;'>C1 — Media Distancia</div>
-        <div style='color:#94a3b8;font-size:0.7rem;line-height:1.4;margin:0.2rem 0;'>Mayor volumen, baja efectividad. Zona de transicion.</div>
-        <div style='color:#818cf8;font-size:0.68rem;font-weight:bold;'>~16m | ~30 | ~5%</div>
-    </div>
-    <div style='flex:1;background:linear-gradient(135deg,#37003c,#1a0020);border-left:4px solid #f472b6;border-radius:0 8px 8px 0;padding:0.7rem 0.8rem;'>
-        <div style='font-family:Bebas Neue,cursive;color:#f472b6;font-size:0.8rem;letter-spacing:1px;'>C2 — Ocasiones Claras</div>
-        <div style='color:#94a3b8;font-size:0.7rem;line-height:1.4;margin:0.2rem 0;'>97% Big Chances. Maxima peligrosidad en el area.</div>
-        <div style='color:#f472b6;font-size:0.68rem;font-weight:bold;'>~10m | ~55 | ~36%</div>
-    </div>
-</div>""", unsafe_allow_html=True)
-
-        else:
-            st.markdown("<div class='insight-box'>Selecciona <b>K=3</b> para ver la interpretacion tactica.</div>", unsafe_allow_html=True)
+        with col_cards:
+            if k == 3:
+                st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.85rem;letter-spacing:2px;margin-bottom:0.5rem;margin-top:0.3rem;'>INTERPRETACION K=3</div>", unsafe_allow_html=True)
+                for cid, nombre, color, dist, ang, conv, desc in [
+                    ('0', 'Tiros Lejanos',    '#00ff85', '~27m', '~20', '~6%',  'Larga distancia, angulo cerrado. Minima peligrosidad.'),
+                    ('1', 'Media Distancia',  '#818cf8', '~16m', '~30', '~5%',  'Mayor volumen, baja efectividad. Zona de transicion.'),
+                    ('2', 'Ocasiones Claras', '#f472b6', '~10m', '~55', '~36%', '97% Big Chances. Maxima peligrosidad en el area.')
+                ]:
+                    st.markdown(
+                        f"<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+                        f"border-left:3px solid {color};border-radius:0 6px 6px 0;"
+                        f"padding:0.6rem 0.8rem;margin-bottom:0.5rem;'>"
+                        f"<div style='font-family:Bebas Neue,cursive;color:{color};"
+                        f"font-size:0.82rem;letter-spacing:1px;'>C{cid} — {nombre}</div>"
+                        f"<div style='color:#94a3b8;font-size:0.72rem;line-height:1.4;"
+                        f"margin:0.2rem 0;'>{desc}</div>"
+                        f"<div style='color:{color};font-size:0.7rem;font-weight:bold;'>"
+                        f"{dist} | {ang} | {conv}</div>"
+                        f"</div>",
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.markdown(
+                    "<div class='insight-box' style='font-size:0.8rem;'>Selecciona <b>K=3</b> para ver la interpretacion tactica de cada cluster.</div>",
+                    unsafe_allow_html=True
+                )
 
     with col_k2:
         df_plot = shots_final[shots_final['x'].notna() & shots_final['y'].notna()].copy()
