@@ -558,24 +558,28 @@ styled = top10.style\
         .set_properties(**{
             'background-color': '#0a0012',
             'color': 'white',
-            'width': '100%'
+            'text-align': 'center'
         })\
         .set_table_styles([
             {'selector': 'table', 'props': [
                 ('width', '100%'),
-                ('border-collapse', 'collapse')
+                ('border-collapse', 'collapse'),
+                ('table-layout', 'fixed')
             ]},
             {'selector': 'th', 'props': [
                 ('background-color', '#37003c'),
                 ('color', '#00ff85'),
                 ('font-weight', 'bold'),
                 ('border', '1px solid #00ff85'),
-                ('padding', '10px 16px'),
-                ('text-align', 'left')
+                ('padding', '10px'),
+                ('text-align', 'center'),
+                ('width', '16.6%')
             ]},
             {'selector': 'td', 'props': [
                 ('border', '1px solid rgba(0,255,133,0.15)'),
-                ('padding', '10px 16px')
+                ('padding', '10px'),
+                ('text-align', 'center'),
+                ('width', '16.6%')
             ]}
         ])
 
