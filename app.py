@@ -479,25 +479,30 @@ with tabs[0]:
         st.markdown("<div class='insight-box'>🎯 Un <b>Big Chance</b> tiene <b>7x mayor</b> probabilidad de gol (36.6% vs 5.5%). Es la variable con mayor <b>Information Gain</b> en el modelo xG — captura el contexto tactico (1v1, portero descolocado) que la geometria sola no puede medir.</div>", unsafe_allow_html=True)
     col3, col4 = st.columns(2) 
     with col3:
-        # Conversión por intervalo de tiempo
         bins = [0, 15, 30, 45, 60, 75, 90, 105]
         labels = ['0-15', '16-30', '31-45', '46-60', '61-75', '76-90', '90+']
-        shots_final['intervalo'] = pd.cut(shots_final['minute'], bins=bins, labels=labels)
-        tiempo_stats = shots_final.groupby('intervalo', observed=True)['is_goal'].agg(['mean','count']).reset_index()
-        tiempo_stats['Conversión (%)'] = tiempo_stats['mean'] * 100
+        shots['intervalo'] = pd.cut(shots['minute'], bins=bins, labels=labels)
+
+        tiempo_stats = shots.groupby('intervalo', observed=True)['is_goal'].agg(
+            count='count', mean='mean').reset_index()
+        tiempo_stats['conversion'] = tiempo_stats['mean'] * 100
 
         fig3 = go.Figure()
-        fig3.add_bar(x=tiempo_stats['intervalo'].astype(str), y=tiempo_stats['count'],
+        fig3.add_bar(x=tiempo_stats['intervalo'].astype(str),
+                     y=tiempo_stats['count'],
                      name='Tiros', marker_color='#37003c', yaxis='y')
-        fig3.add_scatter(x=tiempo_stats['intervalo'].astype(str), y=tiempo_stats['Conversion (%)'],
-                         name='Conversion %', line=dict(color='#00ff85', width=3),
+        fig3.add_scatter(x=tiempo_stats['intervalo'].astype(str),
+                         y=tiempo_stats['conversion'],
+                         name='Conversion %',
+                         line=dict(color='#00ff85', width=3),
                          marker=dict(size=10, color='#00ff85',
                                      line=dict(color='white', width=2)),
                          yaxis='y2', mode='lines+markers')
         fig3.update_layout(
             title='Volumen vs Efectividad por Intervalo',
             title_font=dict(color='#00ff85', size=14),
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color='white'),
             yaxis=dict(title='Tiros', color='white',
                        gridcolor='rgba(255,255,255,0.08)'),
@@ -507,7 +512,7 @@ with tabs[0]:
             bargap=0.3
         )
         st.plotly_chart(fig3, use_container_width=True)
-        st.markdown("<div class='insight-box'>El minuto <b>90+</b> tiene la mayor conversión (>13%) con el menor volumen — fatiga defensiva. Justifica <code>is_final_minutes</code> como feature.</div>", unsafe_allow_html=True)
+        st.markdown("<div class='insight-box'>El minuto <b>90+</b> tiene la mayor conversion (>13%) con el menor volumen — fatiga defensiva. Justifica <code>is_final_minutes</code> como feature.</div>", unsafe_allow_html=True)
 
     with col4:
         # Distribución resultados H/D/A
