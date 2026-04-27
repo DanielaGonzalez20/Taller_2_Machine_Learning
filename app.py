@@ -471,7 +471,7 @@ with tabs[0]:
         fig2.update_traces(textposition='outside', textfont=dict(color='white', size=14))
         st.plotly_chart(fig2, use_container_width=True)
         st.markdown("<div class='insight-box'>🎯 Un <b>Big Chance</b> tiene <b>7x mayor</b> probabilidad de gol (36.6% vs 5.5%). Es la variable con mayor <b>Information Gain</b> en el modelo xG — captura el contexto tactico (1v1, portero descolocado) que la geometria sola no puede medir.</div>", unsafe_allow_html=True)
-
+    col3, col4 = st.columns(2) 
     with col3:
         # Conversión por intervalo de tiempo
         bins = [0, 15, 30, 45, 60, 75, 90, 105]
