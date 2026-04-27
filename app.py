@@ -434,16 +434,15 @@ with tabs[0]:
 
    # BUSCA todo el bloque de fig1 y reemplaza por:
     with col1:
-      counts = shots_final['is_goal'].value_counts().reset_index()
-      counts.columns = ['es_gol', 'cantidad']
-      counts['etiqueta'] = counts['es_gol'].map({0: 'No Gol', 1: 'Gol'})
-      counts['porcentaje'] = counts['cantidad'] / counts['cantidad'].sum() * 100
- 
+      n_gol = int(shots['is_goal'].sum())
+      n_no_gol = int(len(shots) - n_gol)
+      total = n_gol + n_no_gol
+
       fig1 = go.Figure(go.Bar(
-        x=counts['etiqueta'],
-        y=counts['porcentaje'],
+        x=['No Gol', 'Gol'],
+        y=[n_no_gol/total*100, n_gol/total*100],
         marker_color=['#37003c', '#00ff85'],
-        text=[f"{v:.1f}%" for v in counts['porcentaje']],
+        text=[f'{n_no_gol/total*100:.1f}%', f'{n_gol/total*100:.1f}%'],
         textposition='outside',
         textfont=dict(color='white', size=16)
       ))
@@ -455,12 +454,11 @@ with tabs[0]:
         font=dict(color='white'),
         showlegend=False,
         xaxis=dict(color='white', showgrid=False),
-        yaxis=dict(color='white', showgrid=True,
-                   gridcolor='rgba(255,255,255,0.1)', range=[0, 105])
+        yaxis=dict(color='white', range=[0, 105],
+                   gridcolor='rgba(255,255,255,0.1)')
       )
       st.plotly_chart(fig1, use_container_width=True)
-      st.markdown("<div class='insight-box'>Solo el <b>11.2%</b> de los tiros son gol — desbalance 8:1. Un modelo naive que siempre prediga 'No Gol' alcanza 88.8% de accuracy pero nunca detecta un gol real. Por esto usamos <b>AUC-ROC</b> y <b>class_weight='balanced'</b>.</div>", unsafe_allow_html=True)
-   # BUSCA todo el bloque de fig2 y reemplaza por:
+      st.markdown("<div class='insight-box'>Solo el <b>11.2%</b> de los tiros son gol — desbalance 8:1. Un modelo naive que siempre prediga No Gol alcanza 88.8% de accuracy pero nunca detecta un gol real. Por esto usamos <b>AUC-ROC</b> y <b>class_weight=balanced</b>.</div>", unsafe_allow_html=True)
     with col2:
         bc_stats = shots_final.groupby('is_big_chance')['is_goal'].mean().reset_index()
         bc_stats['Tipo'] = bc_stats['is_big_chance'].map({0: 'Tiro Normal', 1: 'Big Chance'})
