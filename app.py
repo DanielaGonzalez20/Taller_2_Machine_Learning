@@ -1141,47 +1141,27 @@ with tabs[5]:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.95rem;letter-spacing:2px;margin-bottom:0.6rem;'>INTERPRETACION K=3</div>", unsafe_allow_html=True)
 
-            cluster_info = {
-                '0': {
-                    'nombre': 'Tiros Lejanos',
-                    'color': '#00ff85',
-                    'desc': 'Larga distancia y angulo cerrado. Minima peligrosidad — el portero tiene tiempo de reaccion.',
-                    'stats': 'Dist ~27m | Ang ~20 | Conv ~6%'
-                },
-                '1': {
-                    'nombre': 'Media Distancia',
-                    'color': '#818cf8',
-                    'desc': 'Mayor volumen pero baja efectividad. Zona de transicion entre mediocampo y area.',
-                    'stats': 'Dist ~16m | Ang ~30 | Conv ~5%'
-                },
-                '2': {
-                    'nombre': 'Ocasiones Claras',
-                    'color': '#f472b6',
-                    'desc': '97% Big Chances. Maxima peligrosidad dentro del area frente al arco.',
-                    'stats': 'Dist ~10m | Ang ~55 | Conv ~36%'
-                }
-            }
+            st.markdown("""
+<div style='display:flex;gap:0.5rem;width:100%;'>
+    <div style='flex:1;background:linear-gradient(135deg,#37003c,#1a0020);border-left:4px solid #00ff85;border-radius:0 8px 8px 0;padding:0.7rem 0.8rem;'>
+        <div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.8rem;letter-spacing:1px;'>C0 — Tiros Lejanos</div>
+        <div style='color:#94a3b8;font-size:0.7rem;line-height:1.4;margin:0.2rem 0;'>Larga distancia, angulo cerrado. Minima peligrosidad.</div>
+        <div style='color:#00ff85;font-size:0.68rem;font-weight:bold;'>~27m | ~20 | ~6%</div>
+    </div>
+    <div style='flex:1;background:linear-gradient(135deg,#37003c,#1a0020);border-left:4px solid #818cf8;border-radius:0 8px 8px 0;padding:0.7rem 0.8rem;'>
+        <div style='font-family:Bebas Neue,cursive;color:#818cf8;font-size:0.8rem;letter-spacing:1px;'>C1 — Media Distancia</div>
+        <div style='color:#94a3b8;font-size:0.7rem;line-height:1.4;margin:0.2rem 0;'>Mayor volumen, baja efectividad. Zona de transicion.</div>
+        <div style='color:#818cf8;font-size:0.68rem;font-weight:bold;'>~16m | ~30 | ~5%</div>
+    </div>
+    <div style='flex:1;background:linear-gradient(135deg,#37003c,#1a0020);border-left:4px solid #f472b6;border-radius:0 8px 8px 0;padding:0.7rem 0.8rem;'>
+        <div style='font-family:Bebas Neue,cursive;color:#f472b6;font-size:0.8rem;letter-spacing:1px;'>C2 — Ocasiones Claras</div>
+        <div style='color:#94a3b8;font-size:0.7rem;line-height:1.4;margin:0.2rem 0;'>97% Big Chances. Maxima peligrosidad en el area.</div>
+        <div style='color:#f472b6;font-size:0.68rem;font-weight:bold;'>~10m | ~55 | ~36%</div>
+    </div>
+</div>""", unsafe_allow_html=True)
 
-            for cluster_id, info in cluster_info.items():
-                st.markdown(
-                    f"<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
-                    f"border-left:4px solid {info['color']};"
-                    f"border-radius:0 8px 8px 0;padding:0.7rem 1rem;"
-                    f"margin-bottom:0.5rem;'>"
-                    f"<div style='font-family:Bebas Neue,cursive;color:{info['color']};"
-                    f"font-size:0.9rem;letter-spacing:2px;'>CLUSTER {cluster_id} — {info['nombre']}</div>"
-                    f"<div style='color:#94a3b8;font-size:0.76rem;line-height:1.5;"
-                    f"margin:0.3rem 0;'>{info['desc']}</div>"
-                    f"<div style='color:{info['color']};font-size:0.72rem;"
-                    f"font-weight:bold;'>{info['stats']}</div>"
-                    f"</div>",
-                    unsafe_allow_html=True
-                )
         else:
-            st.markdown(
-                "<div class='insight-box'>Selecciona <b>K=3</b> para ver la interpretacion tactica de cada cluster.</div>",
-                unsafe_allow_html=True
-            )
+            st.markdown("<div class='insight-box'>Selecciona <b>K=3</b> para ver la interpretacion tactica.</div>", unsafe_allow_html=True)
 
     with col_k2:
         df_plot = shots_final[shots_final['x'].notna() & shots_final['y'].notna()].copy()
