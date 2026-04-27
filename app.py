@@ -919,7 +919,7 @@ with tabs[4]:
     st.markdown("<div class='section-title'>Performance de los Modelos</div>", unsafe_allow_html=True)
 
     # — Benchmark Bet365 —
-    st.markdown("#### Comparación vs Bet365 (Match Predictor)")
+    st.markdown("#### Comparacion vs Bet365 (Match Predictor)")
     BENCHMARK = 0.498
     acc_m = M['acc_cv'].mean()
 
@@ -927,48 +927,78 @@ with tabs[4]:
     with b1:
         st.markdown(f"<div class='kpi-card'><div class='kpi-value' style='color:#94a3b8'>{BENCHMARK*100:.1f}%</div><div class='kpi-label'>Bet365 Accuracy</div></div>", unsafe_allow_html=True)
     with b2:
-        color_acc = "#4ade80" if acc_m > BENCHMARK else "#f87171"
+        color_acc = "#00ff85" if acc_m > BENCHMARK else "#f87171"
         st.markdown(f"<div class='kpi-card'><div class='kpi-value' style='color:{color_acc}'>{acc_m*100:.2f}%</div><div class='kpi-label'>Nuestro Modelo (CV=5)</div></div>", unsafe_allow_html=True)
     with b3:
         diff = (acc_m - BENCHMARK)*100
-        color_diff = "#4ade80" if diff > 0 else "#f87171"
+        color_diff = "#00ff85" if diff > 0 else "#f87171"
         signo = "+" if diff > 0 else ""
         st.markdown(f"<div class='kpi-card'><div class='kpi-value' style='color:{color_diff}'>{signo}{diff:.2f}%</div><div class='kpi-label'>Diferencia</div></div>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
+    # ── MATRICES DE CONFUSION ─────────────────────────────
     col_cm1, col_cm2 = st.columns(2)
 
     with col_cm1:
-        # Confusion matrix Match Predictor
         cm_match = confusion_matrix(M['y_log'], M['y_pred_match'], labels=['H','D','A'])
         fig_cm_match = px.imshow(
             cm_match,
             x=['Home','Draw','Away'], y=['Home','Draw','Away'],
-            color_continuous_scale='Blues',
+            color_continuous_scale='Purples',
             text_auto=True,
-            title=f'Matriz de Confusión — Match Predictor ({acc_m*100:.2f}%)'
+            title=f'Matriz de Confusion — Match Predictor ({acc_m*100:.2f}%)'
         )
-        fig_cm_match.update_layout(paper_bgcolor='rgba(0,0,0,0)',
-                                    font=dict(color='#94a3b8'))
+        fig_cm_match.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            title_font=dict(color='#00ff85')
+        )
         st.plotly_chart(fig_cm_match, use_container_width=True)
+        st.markdown(
+            "<div class='insight-box'>"
+            "<b style='color:#00ff85;'>Interpretacion:</b> "
+            "La diagonal principal muestra las predicciones correctas. "
+            "El modelo predice bien <b>Home (H)</b> con alta precision, pero "
+            "tiene dificultades con los <b>empates (Draw)</b> — Recall=0 para D "
+            "significa que nunca predice empate correctamente. Esto es esperado: "
+            "los empates son el resultado de mayor entropia en futbol (26.1% de partidos) "
+            "y las casas de apuestas tampoco los predicen bien."
+            "</div>",
+            unsafe_allow_html=True
+        )
 
     with col_cm2:
-        # Confusion matrix xG
         cm_xg = confusion_matrix(M['y_te'], M['y_pred_xg'])
         fig_cm_xg = px.imshow(
             cm_xg,
             x=['No Gol','Gol'], y=['No Gol','Gol'],
-            color_continuous_scale='Blues',
+            color_continuous_scale='Purples',
             text_auto=True,
-            title=f'Matriz de Confusión — Modelo xG'
+            title='Matriz de Confusion — Modelo xG'
         )
-        fig_cm_xg.update_layout(paper_bgcolor='rgba(0,0,0,0)',
-                                  font=dict(color='#94a3b8'))
+        fig_cm_xg.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            title_font=dict(color='#00ff85')
+        )
         st.plotly_chart(fig_cm_xg, use_container_width=True)
+        st.markdown(
+            "<div class='insight-box'>"
+            "<b style='color:#00ff85;'>Interpretacion:</b> "
+            "El modelo xG identifica correctamente la mayoria de <b>No Goles</b> "
+            "(alta especificidad), pero tiene un Recall moderado para <b>Goles</b> "
+            "debido al desbalance 8:1 en los datos. "
+            "Los <b>Falsos Negativos</b> (goles predichos como no-gol) son el mayor reto — "
+            "reducirlos requiere features adicionales como presion defensiva o posicion del portero. "
+            "El AUC-ROC >0.80 confirma que el modelo discrimina bien mas alla del umbral de 0.5."
+            "</div>",
+            unsafe_allow_html=True
+        )
 
-    # Curvas ROC
-    st.markdown("#### Curvas ROC — Modelo xG")
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── CURVAS ROC ────────────────────────────────────────
     col_roc1, col_roc2 = st.columns(2)
 
     with col_roc1:
@@ -979,30 +1009,42 @@ with tabs[4]:
 
         fig_roc = go.Figure()
         fig_roc.add_scatter(x=fpr_l, y=tpr_l, mode='lines',
-                            name=f'Logística (AUC={auc_l:.4f})',
-                            line=dict(color='#38bdf8', width=2.5))
+                            name=f'Logistica (AUC={auc_l:.4f})',
+                            line=dict(color='#818cf8', width=2.5))
         fig_roc.add_scatter(x=fpr_rf, y=tpr_rf, mode='lines',
                             name=f'Random Forest (AUC={auc_rf:.4f})',
-                            line=dict(color='#4ade80', width=2.5))
+                            line=dict(color='#00ff85', width=2.5))
         fig_roc.add_scatter(x=[0,1], y=[0,1], mode='lines',
                             name='Aleatorio (AUC=0.5)',
                             line=dict(color='#475569', width=1.5, dash='dash'))
         fig_roc.update_layout(
-            title='Curvas ROC — Logística vs Random Forest',
+            title='Curvas ROC — Logistica vs Random Forest',
             paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#94a3b8'),
+            font=dict(color='white'),
+            title_font=dict(color='#00ff85'),
             xaxis_title='Tasa de Falsos Positivos',
             yaxis_title='Tasa de Verdaderos Positivos',
-            legend=dict(bgcolor='rgba(0,0,0,0)')
+            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white'))
         )
         st.plotly_chart(fig_roc, use_container_width=True)
+        st.markdown(
+            "<div class='insight-box'>"
+            "<b style='color:#00ff85;'>Interpretacion:</b> "
+            "La curva ROC mide la capacidad de discriminacion del modelo independientemente del umbral de decision. "
+            "Un <b>AUC=1.0</b> seria perfecto; <b>AUC=0.5</b> equivale a adivinar al azar. "
+            f"<b>Random Forest (AUC={auc_rf:.4f})</b> supera a la Logistica porque captura "
+            "interacciones no lineales entre features (ej: Big Chance + area chica tiene mayor impacto combinado). "
+            "La ventaja de RF es especialmente visible en la zona de <b>bajo FPR (izquierda)</b>, "
+            "donde comete menos errores cuando predice gol con alta confianza."
+            "</div>",
+            unsafe_allow_html=True
+        )
 
     with col_roc2:
-        # Métricas resumidas
         from sklearn.metrics import precision_score, recall_score, f1_score
         metrics_data = {
-            'Métrica': ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'AUC-ROC'],
-            'Logística xG': [
+            'Metrica': ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'AUC-ROC'],
+            'Logistica xG': [
                 f"{accuracy_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
                 f"{precision_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
                 f"{recall_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
@@ -1011,28 +1053,56 @@ with tabs[4]:
             ],
             'Baseline Naive': ['88.80%', '0.00%', '0.00%', '0.00%', '0.5000']
         }
-        st.markdown("#### Métricas Modelo xG vs Baseline")
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1rem;letter-spacing:2px;margin-bottom:0.5rem;'>METRICAS MODELO xG VS BASELINE</div>", unsafe_allow_html=True)
         st.dataframe(pd.DataFrame(metrics_data), use_container_width=True, hide_index=True)
-
-        st.markdown("<div class='insight-box'>El baseline naive (siempre predice 'No Gol') tiene 88.8% de accuracy pero <b>nunca detecta un gol</b>. El AUC-ROC mide la capacidad real de discriminación independientemente del umbral.</div>", unsafe_allow_html=True)
+        st.markdown(
+            "<div class='insight-box'>"
+            "<b style='color:#00ff85;'>Interpretacion:</b> "
+            "El <b>Baseline Naive</b> (siempre predice No Gol) alcanza 88.8% de accuracy "
+            "pero tiene Precision=0, Recall=0 y F1=0 para la clase Gol — es completamente inutil. "
+            "Nuestro modelo sacrifica algo de accuracy pero gana en <b>Recall</b> "
+            "(detecta goles reales) y <b>AUC-ROC</b> (discrimina bien entre tiros peligrosos y no peligrosos). "
+            "En aplicaciones reales como scouting o analisis tactico, el Recall y el AUC-ROC "
+            "son las metricas que importan."
+            "</div>",
+            unsafe_allow_html=True
+        )
 
         # Accuracy por fold
-        st.markdown("#### Estabilidad por Fold (Match Predictor)")
-        fold_df = pd.DataFrame({'Fold': [f'Fold {i+1}' for i in range(5)],
-                                 'Accuracy': M['acc_cv'] * 100,
-                                 'Bet365': [49.8]*5})
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1rem;letter-spacing:2px;margin:1rem 0 0.5rem 0;'>ESTABILIDAD POR FOLD (MATCH PREDICTOR)</div>", unsafe_allow_html=True)
+        fold_df = pd.DataFrame({
+            'Fold': [f'Fold {i+1}' for i in range(5)],
+            'Accuracy': M['acc_cv'] * 100,
+            'Bet365': [49.8]*5
+        })
         fig_fold = go.Figure()
         fig_fold.add_bar(x=fold_df['Fold'], y=fold_df['Accuracy'],
-                          name='Nuestro Modelo', marker_color='#38bdf8')
+                         name='Nuestro Modelo', marker_color='#818cf8')
         fig_fold.add_scatter(x=fold_df['Fold'], y=fold_df['Bet365'],
-                              name='Bet365 (49.8%)', mode='lines',
-                              line=dict(color='#f87171', width=2, dash='dash'))
-        fig_fold.update_layout(paper_bgcolor='rgba(0,0,0,0)',
-                                plot_bgcolor='rgba(0,0,0,0)',
-                                font=dict(color='#94a3b8'),
-                                legend=dict(bgcolor='rgba(0,0,0,0)'),
-                                yaxis=dict(range=[30, 70]))
+                             name='Bet365 (49.8%)', mode='lines',
+                             line=dict(color='#f87171', width=2, dash='dash'))
+        fig_fold.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white')),
+            yaxis=dict(range=[30, 70], color='white',
+                       gridcolor='rgba(255,255,255,0.08)'),
+            xaxis=dict(color='white')
+        )
         st.plotly_chart(fig_fold, use_container_width=True)
+        st.markdown(
+            "<div class='insight-box'>"
+            "<b style='color:#00ff85;'>Interpretacion:</b> "
+            "La grafica muestra el accuracy del modelo en cada uno de los 5 folds de validacion cruzada. "
+            "La variabilidad entre folds (~41% a ~57%) refleja la dificultad inherente de predecir "
+            "resultados de futbol — con solo 291 partidos, cada fold tiene ~58 partidos de prueba. "
+            "Un cambio de <b>1 prediccion correcta = 1.7% de accuracy</b> por fold. "
+            "El promedio supera o iguala el benchmark de Bet365, lo que indica que el modelo "
+            "es <b>competitivo</b> con la casa de apuestas usando solo features de odds pre-partido."
+            "</div>",
+            unsafe_allow_html=True
+        )
 
 # ═══════════════════════════════════════════════
 # TAB 6: CLUSTERING
