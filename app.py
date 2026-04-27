@@ -579,7 +579,7 @@ styled = top10.style\
             ]}
         ])
 
-    st.write(styled.to_html(), unsafe_allow_html=True)
+st.write(styled.to_html(), unsafe_allow_html=True)
 # ═══════════════════════════════════════════════
 # TAB 2: SHOT MAP
 # ═══════════════════════════════════════════════
