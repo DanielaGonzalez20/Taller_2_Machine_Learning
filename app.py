@@ -534,24 +534,24 @@ with tabs[0]:
 
     # Top goleadores
 st.markdown("<div class='section-title'>Top Goleadores</div>", unsafe_allow_html=True)
-    top10 = players.nlargest(10, 'goals_scored')[
+top10 = players.nlargest(10, 'goals_scored')[
         ['web_name','team','position','goals_scored','xG']].copy()
-    top10['xG'] = pd.to_numeric(top10['xG'], errors='coerce').round(2)
-    top10['Diferencia xG'] = (top10['goals_scored'] - top10['xG']).round(2)
-    top10 = top10.rename(columns={
+top10['xG'] = pd.to_numeric(top10['xG'], errors='coerce').round(2)
+top10['Diferencia xG'] = (top10['goals_scored'] - top10['xG']).round(2)
+top10 = top10.rename(columns={
         'web_name': 'Jugador', 'team': 'Equipo',
         'position': 'Posicion', 'goals_scored': 'Goles',
         'xG': 'xG Esperado'
-    })
+})
 
-    def color_diff(val):
+def color_diff(val):
         if val > 0:
             return 'color: #00ff85; font-weight: bold'
         elif val < 0:
             return 'color: #f87171; font-weight: bold'
         return 'color: white'
 
-    styled = top10.style\
+styled = top10.style\
         .map(color_diff, subset=['Diferencia xG'])\
         .set_properties(**{
             'background-color': '#0a0012',
@@ -571,7 +571,7 @@ st.markdown("<div class='section-title'>Top Goleadores</div>", unsafe_allow_html
             ]}
         ])
 
-    st.write(styled.to_html(), unsafe_allow_html=True)
+st.write(styled.to_html(), unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════
 # TAB 2: SHOT MAP
