@@ -700,7 +700,6 @@ with tabs[1]:
         hoverinfo='text',
         name='Tiros'
     ))
-
     fig_map.update_layout(
         title=f'Shot Map - {filtro_equipo} ({len(df_map):,} tiros)',
         title_font=dict(color='#00ff85', size=14),
@@ -712,9 +711,8 @@ with tabs[1]:
         yaxis=dict(range=[-5, 105], showgrid=False, visible=False),
         margin=dict(t=40, b=10, l=0, r=80),
         showlegend=False
-     )
-     st.plotly_chart(fig_map, use_container_width=True)
-
+    )
+    st.plotly_chart(fig_map, use_container_width=True)
     m1, m2, m3 = st.columns(3)
     with m1:
         st.metric("Tiros Mostrados", f"{len(df_map):,}")
