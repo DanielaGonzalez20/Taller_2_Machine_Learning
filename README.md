@@ -5,7 +5,7 @@
 - Belén Shalom Dueñas Pacheco
 
 ## 2. URL del Dashboard Desplegado 
- **[https://ml-premier-league-jaxujexnfjcpm6fp3vw3qv.streamlit.app/]**
+ **[https://ml-premier-league-jaxujexnfjcpm6fp3vw3qv.streamlit.app/](https://ml-premier-league.streamlit.app/#premier-league-ml-analytics)]**
 
 ## 3. Descripción Breve del *Approach* y *Features* Utilizadas 
 Este proyecto implementa un pipeline analítico y predictivo enfocado en los remates y eventos de fútbol.
@@ -15,9 +15,62 @@ Este proyecto implementa un pipeline analítico y predictivo enfocado en los rem
 * Entrenamos modelos de *Machine Learning* Descriptivo y Predictivo abarcando tanto Algoritmos Supervisados (Regresión Logística, Random Forest, Gradient Boosting para cálculo de "Expected Goals") como No Supervisados (Clustering K-Means para agrupar comportamientos de remate).
 * Para moderar la varianza generada por eventos fortuitos en el fútbol, aplicamos técnicas algorítmicas de regularización (Ridge - L2) en la inferencia de resultados globales del partido, demostrando mitigación del *overfitting*.
 
-**Features Principales Utilizadas:**
-* **Espaciales:** `Distance` (Distancia al arco), `Angle` (Apertura angular hacia la portería).
-* **Contextuales:** `Minute` (Minuto del remate), `Pressure_Index` (Índice de aglomeración defensiva), `Is_Fast_Break` (Contraataque rápido).
+## ⚽ Features Principales Utilizadas
+
+El modelo utiliza variables geométricas, contextuales, técnicas y espaciales para predecir la probabilidad de gol.
+
+### 📐 1. Feature Geométrica (post-VIF)
+
+- **`angulo_zona`**  
+  Ángulo de visión al arco discretizado en **5 zonas tácticas**.  
+  > Nota: la variable *distancia* fue eliminada por multicolinealidad (**VIF ≈ 5.5**).
+
+---
+
+### 🧠 2. Features Contextuales / Tácticas
+
+- **`is_big_chance`**  
+  Indica si la jugada es una ocasión clara.  
+  → Tasa de conversión: **36.6%**  
+  → Predictor más importante (según *Mutual Information*)
+
+- **`is_penalty`**  
+  Indica si el tiro es penal.  
+  → Tasa de conversión: **82.9%**
+
+- **`is_fast_break`**  
+  Indica si la jugada ocurre en un contraataque rápido.
+
+- **`is_final_minutes`**  
+  Indica si el evento ocurre en los minutos finales (**minuto > 85**), asociado a fatiga defensiva.
+
+---
+
+### 🎯 3. Features Técnicas
+
+- **`is_header`**  
+  Remate de cabeza.  
+  → Coeficiente negativo (menor efectividad relativa)
+
+- **`first_touch`**  
+  Indica si el remate fue a primer toque.
+
+---
+
+### 📍 4. Features Espaciales (Zona)
+
+- **`en_area_grande`**  
+  Indica si el tiro ocurre dentro del área penal (**x ≥ 83**)
+
+- **`en_area_chica`**  
+  Indica si el tiro ocurre dentro del área chica (**x ≥ 94**)
+
+---
+
+### 📊 5. Variable Continua
+
+- **`goal_mouth_z`** *(opcional)*  
+  Altura del disparo dentro del arco.
 * **Binarias/Categóricas:** `Is_Big_Chance` (Ocasión inmejorable), `Is_Header` (Remate de cabeza).
 
 ## 4. Instrucciones para Ejecutar el Notebook y Dashboard localmente 
