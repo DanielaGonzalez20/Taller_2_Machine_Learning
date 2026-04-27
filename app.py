@@ -1142,6 +1142,8 @@ with tabs[4]:
     # ── CURVAS ROC (3 modelos) + COEFICIENTES ──────────────
     col_roc1, col_roc2 = st.columns(2)
 
+    col_roc1, col_roc2 = st.columns([1.5, 1])
+
     with col_roc1:
         fpr_l,   tpr_l,   _ = roc_curve(M['y_te'],  M['y_prob_xg'])
         fpr_rf,  tpr_rf,  _ = roc_curve(M['y_te_r'], M['rf_probs'])
@@ -1171,15 +1173,101 @@ with tabs[4]:
         st.plotly_chart(fig_roc, use_container_width=True)
         st.markdown(
             "<div class='insight-box'>"
-            "<b style='color:#00ff85;'>Que aporta esta grafica:</b> "
-            "Muestra la relacion entre Recall (tiros peligrosos detectados) y Falsos Positivos "
-            "a lo largo de <b>todos los umbrales de decision posibles</b>, no solo el 0.5. "
-            f"<b>XGBoost (AUC={auc_xgb:.4f})</b> domina en toda la curva, especialmente en "
-            "la zona de bajo FPR (izquierda) donde comete menos errores al predecir goles "
-            "con alta confianza. Permite elegir el modelo segun el contexto de uso."
+            f"<b>XGBoost (AUC={auc_xgb:.4f})</b> domina en toda la curva. "
+            "La zona de bajo FPR (izquierda) es donde comete menos errores al predecir "
+            "goles con alta confianza — la mas relevante para scouting tactico."
             "</div>",
             unsafe_allow_html=True
         )
+
+    with col_roc2:
+        st.markdown(
+            "<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;"
+            "letter-spacing:2px;margin-bottom:1rem;'>VER DETALLE DEL MODELO</div>",
+            unsafe_allow_html=True
+        )
+
+        # Estado de los botones
+        if 'vista_performance' not in st.session_state:
+            st.session_state.vista_performance = 'coeficientes'
+
+        btn1, btn2 = st.columns(2)
+        with btn1:
+            if st.button('Coeficientes', use_container_width=True, key='btn_coef'):
+                st.session_state.vista_performance = 'coeficientes'
+        with btn2:
+            if st.button('Matriz Confusion', use_container_width=True, key='btn_cm'):
+                st.session_state.vista_performance = 'confusion'
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # Mostrar según botón seleccionado
+        if st.session_state.vista_performance == 'coeficientes':
+            st.markdown(
+                "<div style='font-size:0.75rem;color:#818cf8;letter-spacing:1px;"
+                "margin-bottom:0.5rem;'>COEFICIENTES — REGRESION LOGISTICA xG</div>",
+                unsafe_allow_html=True
+            )
+            coef_df = pd.DataFrame({
+                'Feature': M['features_xg'],
+                'Coeficiente': M['model_xg'].coef_[0]
+            }).sort_values('Coeficiente', ascending=True)
+
+            fig_coef = go.Figure(go.Bar(
+                x=coef_df['Coeficiente'],
+                y=coef_df['Feature'],
+                orientation='h',
+                marker_color=['#f87171' if c < 0 else '#00ff85'
+                              for c in coef_df['Coeficiente']],
+                text=[f'{c:.3f}' for c in coef_df['Coeficiente']],
+                textposition='outside'
+            ))
+            fig_coef.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                xaxis=dict(color='white', gridcolor='rgba(255,255,255,0.08)'),
+                yaxis=dict(color='white'),
+                height=380,
+                margin=dict(t=10, b=10, l=0, r=60)
+            )
+            st.plotly_chart(fig_coef, use_container_width=True)
+            st.markdown(
+                "<div class='insight-box' style='font-size:0.8rem;'>"
+                "Verde = aumenta xG | Rojo = disminuye xG. "
+                "<b>is_big_chance</b> e <b>is_penalty</b> dominan. "
+                "<b>is_header</b> negativo confirma que los cabezazos no son mas efectivos."
+                "</div>",
+                unsafe_allow_html=True
+            )
+
+        else:
+            st.markdown(
+                "<div style='font-size:0.75rem;color:#818cf8;letter-spacing:1px;"
+                "margin-bottom:0.5rem;'>MATRIZ DE CONFUSION — MODELO xG</div>",
+                unsafe_allow_html=True
+            )
+            cm_xg = confusion_matrix(M['y_te'], M['y_pred_xg'])
+            fig_cm_xg = px.imshow(
+                cm_xg,
+                x=['No Gol', 'Gol'], y=['No Gol', 'Gol'],
+                color_continuous_scale='Purples',
+                text_auto=True
+            )
+            fig_cm_xg.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                height=380,
+                margin=dict(t=10, b=10)
+            )
+            st.plotly_chart(fig_cm_xg, use_container_width=True)
+            st.markdown(
+                "<div class='insight-box' style='font-size:0.8rem;'>"
+                "Los <b>Falsos Negativos</b> (goles predichos como no-gol) son el mayor reto "
+                "en un dataset 8:1. El AUC-ROC complementa esta matriz evaluando "
+                "el modelo en todos los umbrales posibles, no solo el 0.5."
+                "</div>",
+                unsafe_allow_html=True
+            )
 
     with col_roc2:
         # COEFICIENTES
