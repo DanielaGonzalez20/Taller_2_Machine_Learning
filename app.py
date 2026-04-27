@@ -1163,7 +1163,7 @@ with tabs[4]:
     with col_roc2:
         st.markdown(
             "<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;"
-            "letter-spacing:2px;margin-bottom:1rem;'>VER DETALLE DEL MODELO</div>",
+            "letter-spacing:2px;margin-bottom:1rem;'>VER DETALLE DE MODELO: Regresión Logística</div>",
             unsafe_allow_html=True
         )
 
