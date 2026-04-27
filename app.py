@@ -1073,7 +1073,8 @@ with tabs[5]:
                          'Angulo_Medio': 'Angulo Medio', 'BigChance_Rate': 'Big Chance %'}),
             use_container_width=True, hide_index=True
         )
-        # --- MÉTODO DEL CODO + SILUETA ---
+
+        # --- METODO DEL CODO + SILUETA ---
         from sklearn.metrics import silhouette_score
 
         inercias = []
@@ -1086,10 +1087,8 @@ with tabs[5]:
             inercias.append(km_test.inertia_)
             siluetas.append(silhouette_score(X_km_sc, labels_test))
 
-        # Mejor K por silueta
         mejor_k = list(k_range)[siluetas.index(max(siluetas))]
 
-        # Gráfica
         fig_elbow = go.Figure()
         fig_elbow.add_trace(go.Scatter(
             x=list(k_range), y=inercias,
@@ -1107,7 +1106,6 @@ with tabs[5]:
             marker=dict(size=8, color='#f472b6'),
             yaxis='y2'
         ))
-        # Marcar el mejor K
         fig_elbow.add_vline(
             x=mejor_k,
             line=dict(color='#facc15', width=2, dash='dash')
@@ -1129,14 +1127,61 @@ with tabs[5]:
         )
         st.plotly_chart(fig_elbow, use_container_width=True)
 
-        # Interpretación textual
-        st.markdown(f"<div class='insight-box'>"
-                    f"El <b style='color:#facc15;'>K={mejor_k}</b> es el optimo segun el "
-                    f"coeficiente de silueta ({max(siluetas):.3f}). "
-                    f"Valores de silueta cercanos a 1 indican clusters bien separados. "
-                    f"El metodo del codo (inercia) confirma que agregar mas clusters "
-                    f"despues de K={mejor_k} aporta poca mejora."
-                    f"</div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='insight-box'>"
+            f"El <b style='color:#facc15;'>K={mejor_k}</b> es el optimo segun el "
+            f"coeficiente de silueta ({max(siluetas):.3f}). "
+            f"Valores de silueta cercanos a 1 indican clusters bien separados. "
+            f"El metodo del codo (inercia) confirma que agregar mas clusters "
+            f"despues de K={mejor_k} aporta poca mejora."
+            f"</div>", unsafe_allow_html=True)
+
+        # --- TARJETAS DE INTERPRETACION (debajo del elbow) ---
+        if k == 3:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.95rem;letter-spacing:2px;margin-bottom:0.6rem;'>INTERPRETACION K=3</div>", unsafe_allow_html=True)
+
+            cluster_info = {
+                '0': {
+                    'nombre': 'Tiros Lejanos',
+                    'color': '#00ff85',
+                    'desc': 'Larga distancia y angulo cerrado. Minima peligrosidad — el portero tiene tiempo de reaccion.',
+                    'stats': 'Dist ~27m | Ang ~20 | Conv ~6%'
+                },
+                '1': {
+                    'nombre': 'Media Distancia',
+                    'color': '#818cf8',
+                    'desc': 'Mayor volumen pero baja efectividad. Zona de transicion entre mediocampo y area.',
+                    'stats': 'Dist ~16m | Ang ~30 | Conv ~5%'
+                },
+                '2': {
+                    'nombre': 'Ocasiones Claras',
+                    'color': '#f472b6',
+                    'desc': '97% Big Chances. Maxima peligrosidad dentro del area frente al arco.',
+                    'stats': 'Dist ~10m | Ang ~55 | Conv ~36%'
+                }
+            }
+
+            for cluster_id, info in cluster_info.items():
+                st.markdown(
+                    f"<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+                    f"border-left:4px solid {info['color']};"
+                    f"border-radius:0 8px 8px 0;padding:0.7rem 1rem;"
+                    f"margin-bottom:0.5rem;'>"
+                    f"<div style='font-family:Bebas Neue,cursive;color:{info['color']};"
+                    f"font-size:0.9rem;letter-spacing:2px;'>CLUSTER {cluster_id} — {info['nombre']}</div>"
+                    f"<div style='color:#94a3b8;font-size:0.76rem;line-height:1.5;"
+                    f"margin:0.3rem 0;'>{info['desc']}</div>"
+                    f"<div style='color:{info['color']};font-size:0.72rem;"
+                    f"font-weight:bold;'>{info['stats']}</div>"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
+        else:
+            st.markdown(
+                "<div class='insight-box'>Selecciona <b>K=3</b> para ver la interpretacion tactica de cada cluster.</div>",
+                unsafe_allow_html=True
+            )
 
     with col_k2:
         df_plot = shots_final[shots_final['x'].notna() & shots_final['y'].notna()].copy()
@@ -1147,7 +1192,6 @@ with tabs[5]:
 
         fig_km = go.Figure()
 
-        # Puntos por cluster (encima de la cancha)
         for cluster_id in sorted(df_plot['cluster'].unique()):
             mask = df_plot['cluster'] == cluster_id
             fig_km.add_trace(go.Scatter(
@@ -1163,61 +1207,44 @@ with tabs[5]:
                 name=f'Cluster {cluster_id}'
             ))
 
-        # Cancha verde
         lc = "rgba(255,255,255,0.95)"
 
-        # Franjas verdes
         for i in range(10):
             color = "#2d6e1a" if i % 2 == 0 else "#347d1e"
             fig_km.add_shape(type="rect",
                              x0=i*10, y0=0, x1=(i+1)*10, y1=100,
                              fillcolor=color, line=dict(width=0), layer="below")
 
-        # Borde exterior
         fig_km.add_shape(type="rect", x0=0, y0=0, x1=100, y1=100,
                          line=dict(color=lc, width=2.5), layer="below")
-        # Linea media
         fig_km.add_shape(type="line", x0=50, y0=0, x1=50, y1=100,
                          line=dict(color=lc, width=2), layer="below")
-        # Circulo central
         fig_km.add_shape(type="circle", x0=41, y0=41, x1=59, y1=59,
                          line=dict(color=lc, width=2), layer="below")
-        # Punto central
         fig_km.add_shape(type="circle", x0=49, y0=49, x1=51, y1=51,
                          fillcolor=lc, line=dict(color=lc), layer="below")
-        # Area grande derecha
         fig_km.add_shape(type="rect", x0=83, y0=21.1, x1=100, y1=78.9,
                          line=dict(color=lc, width=2), layer="below")
-        # Area chica derecha
         fig_km.add_shape(type="rect", x0=94, y0=36.8, x1=100, y1=63.2,
                          line=dict(color=lc, width=2), layer="below")
-        # Porteria derecha
         fig_km.add_shape(type="rect", x0=100, y0=45.2, x1=102, y1=54.8,
                          line=dict(color=lc, width=2),
                          fillcolor="rgba(255,255,255,0.3)", layer="below")
-        # Semicirculo derecho
         fig_km.add_shape(type="circle", x0=77, y0=42, x1=89, y1=58,
                          line=dict(color=lc, width=2), layer="below")
-        # Punto penal derecho
         fig_km.add_shape(type="circle", x0=88.5, y0=49.3, x1=89.5, y1=50.7,
                          fillcolor=lc, line=dict(color=lc), layer="below")
-        # Area grande izquierda
         fig_km.add_shape(type="rect", x0=0, y0=21.1, x1=17, y1=78.9,
                          line=dict(color=lc, width=2), layer="below")
-        # Area chica izquierda
         fig_km.add_shape(type="rect", x0=0, y0=36.8, x1=6, y1=63.2,
                          line=dict(color=lc, width=2), layer="below")
-        # Porteria izquierda
         fig_km.add_shape(type="rect", x0=-2, y0=45.2, x1=0, y1=54.8,
                          line=dict(color=lc, width=2),
                          fillcolor="rgba(255,255,255,0.3)", layer="below")
-        # Semicirculo izquierdo
         fig_km.add_shape(type="circle", x0=11, y0=42, x1=23, y1=58,
                          line=dict(color=lc, width=2), layer="below")
-        # Punto penal izquierdo
         fig_km.add_shape(type="circle", x0=10.5, y0=49.3, x1=11.5, y1=50.7,
                          fillcolor=lc, line=dict(color=lc), layer="below")
-        # Esquinas
         for cx, cy in [(0, 0), (0, 100), (100, 0), (100, 100)]:
             fig_km.add_shape(type="circle",
                              x0=cx-3, y0=cy-3, x1=cx+3, y1=cy+3,
@@ -1236,55 +1263,10 @@ with tabs[5]:
             margin=dict(t=40, b=10, l=0, r=10)
         )
         st.plotly_chart(fig_km, use_container_width=True)
-        # --- INTERPRETACIÓN DE CLUSTERS ---
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1.2rem;letter-spacing:3px;margin-bottom:1rem;'>INTERPRETACION DE CLUSTERS</div>", unsafe_allow_html=True)
 
-        cluster_info = {
-            '0': {
-                'nombre': 'Tiros Lejanos',
-                'emoji': '🟤',
-                'color': '#facc15',
-                'desc': 'Disparos desde larga distancia y angulo cerrado. Alta frecuencia pero minima peligrosidad. El portero tiene tiempo de reaccion y el angulo de vision al arco es reducido.',
-                'stats': 'Distancia ~27m | Angulo ~20° | Conversion ~6%'
-            },
-            '1': {
-                'nombre': 'Media Distancia',
-                'emoji': '🔵',
-                'color': '#38bdf8',
-                'desc': 'Zona de transicion entre mediocampo y area. El mayor volumen de tiros de la temporada pero con baja efectividad. Tipicamente remates de larga distancia o tiros precipitados.',
-                'stats': 'Distancia ~16m | Angulo ~30° | Conversion ~5%'
-            },
-            '2': {
-                'nombre': 'Ocasiones Claras',
-                'emoji': '🟢',
-                'color': '#00ff85',
-                'desc': 'Zona de maximo peligro. Tiros dentro del area, frente al arco con angulo amplio. El 97% son Big Chances — el modelo xG asigna probabilidades altas a estos remates.',
-                'stats': 'Distancia ~10m | Angulo ~55° | Conversion ~36%'
-            }
-        }
-
-        cols_interp = st.columns(3)
-        for idx, (cluster_id, info) in enumerate(cluster_info.items()):
-            with cols_interp[idx]:
-                st.markdown(f"""
-<div style='background:linear-gradient(135deg,#37003c,#1a0020);
-            border:2px solid {info["color"]};
-            border-radius:12px;padding:1.2rem;height:100%;
-            box-shadow:0 0 15px {info["color"]}22;'>
-    <div style='font-size:1.8rem;margin-bottom:0.5rem;'>{info["emoji"]}</div>
-    <div style='font-family:Bebas Neue,cursive;color:{info["color"]};
-                font-size:1.1rem;letter-spacing:2px;margin-bottom:0.5rem;'>
-        CLUSTER {cluster_id} — {info["nombre"]}
-    </div>
-    <div style='color:#94a3b8;font-size:0.82rem;line-height:1.6;margin-bottom:0.8rem;'>
-        {info["desc"]}
-    </div>
-    <div style='background:rgba(255,255,255,0.05);border-radius:6px;
-                padding:0.5rem;font-size:0.75rem;color:{info["color"]};
-                font-weight:bold;text-align:center;letter-spacing:1px;'>
-        {info["stats"]}
-    </div>
-</div>""", unsafe_allow_html=True)
-
-    st.markdown("<div class='insight-box'>El clustering revela patrones naturales en los tipos de tiro: tiros de larga distancia con bajo xG, remates en el area chica con alta conversion, y Big Chances distribuidas en el centro del area grande.</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='insight-box'>El clustering revela patrones naturales en los tipos de tiro: "
+        "tiros de larga distancia con bajo xG, remates en el area chica con alta conversion, "
+        "y Big Chances distribuidas en el centro del area grande.</div>",
+        unsafe_allow_html=True
+    )
