@@ -705,7 +705,7 @@ with tabs[1]:
         title_font=dict(color='#00ff85', size=14),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='#2d6e1a',
-        height=750,
+        height=600,
         font=dict(color='white'),
         xaxis=dict(range=[-5, 105], showgrid=False, visible=False),
         yaxis=dict(range=[-5, 105], showgrid=False, visible=False),
