@@ -452,24 +452,25 @@ with tabs[0]:
         fig1.update_traces(textposition='outside', textfont=dict(color='white', size=14))
         st.plotly_chart(fig1, use_container_width=True)
         st.markdown("<div class='insight-box'>⚠️ Solo el <b>11.2%</b> de los tiros son gol — desbalance 8:1. Un modelo naive que siempre prediga 'No Gol' alcanza 88.8% de accuracy pero nunca detecta un gol real. Por esto usamos <b>AUC-ROC</b> como métrica principal y aplicamos <b>class_weight='balanced'</b> en los modelos de ensamble.</div>", unsafe_allow_html=True)
+   # BUSCA todo el bloque de fig2 y reemplaza por:
     with col2:
-        # Big Chance
         bc_stats = shots_final.groupby('is_big_chance')['is_goal'].mean().reset_index()
         bc_stats['Tipo'] = bc_stats['is_big_chance'].map({0: 'Tiro Normal', 1: 'Big Chance'})
-        bc_stats['Conversión (%)'] = bc_stats['is_goal'] * 100
+        bc_stats['Conversion'] = bc_stats['is_goal'] * 100
 
-        fig2 = px.bar(bc_stats, x='Tipo', y='Conversión (%)',
+        fig2 = px.bar(bc_stats, x='Tipo', y='Conversion',
                       color='Tipo',
-                      color_discrete_map={'Tiro Normal': '#1e3a5f', 'Big Chance': '#f472b6'},
-                      text=bc_stats['Conversión (%)'].apply(lambda x: f'{x:.1f}%'),
-                      title='Big Chance: El Predictor más Poderoso')
-        fig2.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                           showlegend=False, font=dict(color='#94a3b8'))
-        fig2.update_traces(textposition='outside')
+                      color_discrete_map={'Tiro Normal': '#37003c', 'Big Chance': '#00ff85'},
+                      text=bc_stats['Conversion'].apply(lambda x: f'{x:.1f}%'),
+                      title='Big Chance: El Predictor mas Poderoso')
+        fig2.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            showlegend=False, font=dict(color='white'),
+            title_font=dict(color='#00ff85'),
+            xaxis=dict(color='white'), yaxis=dict(color='white', title='Conversion (%)'))
+        fig2.update_traces(textposition='outside', textfont=dict(color='white', size=14))
         st.plotly_chart(fig2, use_container_width=True)
-        st.markdown("<div class='insight-box'>Un <b>Big Chance</b> tiene ~7x mayor probabilidad de gol (~36% vs ~5%). Es la variable de mayor Information Gain en el modelo xG.</div>", unsafe_allow_html=True)
-
-    col3, col4 = st.columns(2)
+        st.markdown("<div class='insight-box'>🎯 Un <b>Big Chance</b> tiene <b>7x mayor</b> probabilidad de gol (36.6% vs 5.5%). Es la variable con mayor <b>Information Gain</b> en el modelo xG — captura el contexto tactico (1v1, portero descolocado) que la geometria sola no puede medir.</div>", unsafe_allow_html=True)
 
     with col3:
         # Conversión por intervalo de tiempo
@@ -488,10 +489,11 @@ with tabs[0]:
         fig3.update_layout(
             title='Volumen vs Efectividad por Intervalo',
             paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='#94a3b8'),
-            yaxis=dict(title='Tiros', color='#64748b'),
-            yaxis2=dict(title='Conversión (%)', overlaying='y', side='right', color='#f472b6'),
-            legend=dict(bgcolor='rgba(0,0,0,0)')
+            font=dict(color='white'),
+            title_font=dict(color='#00ff85'),
+            yaxis=dict(title='Tiros', color='#94a3b8'),
+            yaxis2=dict(title='Conversion (%)', overlaying='y', side='right', color='#00ff85'),
+            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white'))
         )
         st.plotly_chart(fig3, use_container_width=True)
         st.markdown("<div class='insight-box'>El minuto <b>90+</b> tiene la mayor conversión (>13%) con el menor volumen — fatiga defensiva. Justifica <code>is_final_minutes</code> como feature.</div>", unsafe_allow_html=True)
@@ -502,13 +504,17 @@ with tabs[0]:
         fig4 = px.pie(
             values=result_counts.values,
             names=['Home Win', 'Draw', 'Away Win'],
-            color_discrete_sequence=['#38bdf8', '#64748b', '#818cf8'],
+            color_discrete_sequence=['#00ff85', '#37003c', '#818cf8'],
             hole=0.55,
-            title='Distribución de Resultados — Premier League'
+            title='Distribucion de Resultados'
         )
-        fig4.update_layout(paper_bgcolor='rgba(0,0,0,0)', font=dict(color='#94a3b8'))
+        fig4.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            title_font=dict(color='#00ff85'),
+            legend=dict(font=dict(color='white')))
         st.plotly_chart(fig4, use_container_width=True)
-        st.markdown(f"<div class='insight-box'>Local gana el <b>{result_counts.get('H',0)/len(matches)*100:.1f}%</b> de los partidos. Los empates (<b>{result_counts.get('D',0)/len(matches)*100:.1f}%</b>) son el resultado más difícil de predecir — alta entropía táctica.</div>", unsafe_allow_html=True)
+        st.markdown("<div class='insight-box'>🏠 El local gana el <b>42.3%</b> de los partidos — la ventaja de localía es real. Los <b>empates (26.1%)</b> son el resultado mas difícil de predecir: el modelo logístico tiene Recall=0 para Draw, lo que refleja la alta aleatoriedad táctica de este resultado.</div>", unsafe_allow_html=True)
 
     # Top goleadores
     st.markdown("<div class='section-title'>Top Goleadores</div>", unsafe_allow_html=True)
