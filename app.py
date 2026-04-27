@@ -39,7 +39,7 @@ html, body, [class*="css"] {
 
 .hero-title {
     font-family: 'Bebas Neue', cursive;
-    font-size: clamp(1.5rem, 4vw, 3.5rem);
+    font-size: 42px; 
     letter-spacing: 2px;
     background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #f472b6 100%);
     -webkit-background-clip: text;
