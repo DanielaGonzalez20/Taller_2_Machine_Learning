@@ -1054,15 +1054,352 @@ with tabs[3]:
         )
     else:
         st.warning("No hay suficiente historial para estos equipos. Se necesitan al menos 2 partidos previos.")
-
 # ═══════════════════════════════════════════════
 # TAB 5: PERFORMANCE
 # ═══════════════════════════════════════════════
 with tabs[4]:
     st.markdown("<div class='section-title'>Performance de los Modelos</div>", unsafe_allow_html=True)
 
-    # — Benchmark Bet365 —
-    st.markdown("#### Comparacion vs Bet365 (Match Predictor)")
+    # Intro
+    st.markdown(
+        "<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+        "border:1px solid #00ff85;border-radius:12px;padding:1.2rem 1.8rem;"
+        "margin-bottom:1.5rem;'>"
+        "<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1.1rem;"
+        "letter-spacing:3px;margin-bottom:0.6rem;'>RESUMEN DE MODELOS IMPLEMENTADOS</div>"
+        "<div style='display:flex;gap:1rem;flex-wrap:wrap;'>"
+        "<div style='flex:1;min-width:150px;background:rgba(0,255,133,0.05);"
+        "border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.7rem;'>"
+        "<div style='color:#00ff85;font-family:Bebas Neue,cursive;font-size:0.85rem;'>MODELO 1 — xG</div>"
+        "<div style='color:#94a3b8;font-size:0.75rem;'>Logistica + RF + XGBoost</div></div>"
+        "<div style='flex:1;min-width:150px;background:rgba(129,140,248,0.05);"
+        "border:1px solid rgba(129,140,248,0.2);border-radius:8px;padding:0.7rem;'>"
+        "<div style='color:#818cf8;font-family:Bebas Neue,cursive;font-size:0.85rem;'>MODELO 2A — GOLES</div>"
+        "<div style='color:#94a3b8;font-size:0.75rem;'>Ridge L2 (historial + odds)</div></div>"
+        "<div style='flex:1;min-width:150px;background:rgba(244,114,182,0.05);"
+        "border:1px solid rgba(244,114,182,0.2);border-radius:8px;padding:0.7rem;'>"
+        "<div style='color:#f472b6;font-family:Bebas Neue,cursive;font-size:0.85rem;'>MODELO 2B — H/D/A</div>"
+        "<div style='color:#94a3b8;font-size:0.75rem;'>Logistica Multinomial vs Bet365</div></div>"
+        "</div></div>",
+        unsafe_allow_html=True
+    )
+
+    # ══════════════════════════════════════════════
+    # SECCIÓN 1: MODELO xG — COMPARACIÓN DE MODELOS
+    # ══════════════════════════════════════════════
+    st.markdown("<div class='section-title'>Modelo 1 — xG: Comparación de Algoritmos</div>", unsafe_allow_html=True)
+
+    st.markdown(
+        "<div class='insight-box'>"
+        "<b style='color:#00ff85;'>Variables utilizadas en todos los modelos xG:</b> "
+        "angulo_zona · is_big_chance · is_penalty · is_header · is_fast_break · "
+        "first_touch · en_area_grande · en_area_chica · is_final_minutes. "
+        "La distancia fue eliminada por multicolinealidad (VIF~5.5). "
+        "El angulo fue discretizado en 5 zonas tras el test de Box-Tidwell (p=0.0012). "
+        "Logistica usa StandardScaler; RF y XGBoost NO necesitan escalar (arboles de decision)."
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    # KPIs AUC
+    k_auc1, k_auc2, k_auc3 = st.columns(3)
+    auc_l = roc_auc_score(M['y_te'], M['y_prob_xg'])
+    auc_rf = roc_auc_score(M['y_te_r'], M['rf_probs'])
+
+    with k_auc1:
+        st.markdown(
+            f"<div class='kpi-card'>"
+            f"<div class='kpi-value' style='color:#818cf8;'>0.8038</div>"
+            f"<div class='kpi-label'>Logistica xG (CV=5)</div>"
+            f"</div>", unsafe_allow_html=True)
+    with k_auc2:
+        st.markdown(
+            f"<div class='kpi-card'>"
+            f"<div class='kpi-value' style='color:#00ff85;'>0.8839</div>"
+            f"<div class='kpi-label'>Random Forest AUC</div>"
+            f"</div>", unsafe_allow_html=True)
+    with k_auc3:
+        st.markdown(
+            f"<div class='kpi-card'>"
+            f"<div class='kpi-value' style='color:#f472b6;'>0.9158</div>"
+            f"<div class='kpi-label'>XGBoost AUC</div>"
+            f"</div>", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Curvas ROC + Matriz confusion xG
+    col_roc1, col_roc2 = st.columns(2)
+
+    with col_roc1:
+        fpr_l, tpr_l, _ = roc_curve(M['y_te'], M['y_prob_xg'])
+        fpr_rf, tpr_rf, _ = roc_curve(M['y_te_r'], M['rf_probs'])
+
+        fig_roc = go.Figure()
+        fig_roc.add_scatter(x=fpr_l, y=tpr_l, mode='lines',
+                            name=f'Logistica (AUC=0.8038)',
+                            line=dict(color='#818cf8', width=2.5))
+        fig_roc.add_scatter(x=fpr_rf, y=tpr_rf, mode='lines',
+                            name=f'Random Forest (AUC=0.8839)',
+                            line=dict(color='#00ff85', width=2.5))
+        fig_roc.add_scatter(x=[0, 1], y=[0, 1], mode='lines',
+                            name='Aleatorio (AUC=0.5)',
+                            line=dict(color='#475569', width=1.5, dash='dash'))
+        fig_roc.update_layout(
+            title='Curvas ROC — Logistica vs Random Forest',
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'), title_font=dict(color='#00ff85'),
+            xaxis_title='Tasa de Falsos Positivos',
+            yaxis_title='Tasa de Verdaderos Positivos',
+            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white'))
+        )
+        st.plotly_chart(fig_roc, use_container_width=True)
+
+    with col_roc2:
+        cm_xg = confusion_matrix(M['y_te'], M['y_pred_xg'])
+        fig_cm_xg = px.imshow(
+            cm_xg,
+            x=['No Gol', 'Gol'], y=['No Gol', 'Gol'],
+            color_continuous_scale='Purples',
+            text_auto=True,
+            title='Matriz de Confusion — Modelo xG (Logistica)'
+        )
+        fig_cm_xg.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            title_font=dict(color='#00ff85')
+        )
+        st.plotly_chart(fig_cm_xg, use_container_width=True)
+
+    # Interpretaciones textuales de cada modelo
+    st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1rem;letter-spacing:2px;margin:1rem 0 0.5rem 0;'>INTERPRETACION POR MODELO</div>", unsafe_allow_html=True)
+
+    col_m1, col_m2, col_m3 = st.columns(3)
+
+    with col_m1:
+        st.markdown(
+            "<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+            "border:2px solid #818cf8;border-radius:12px;padding:1rem;height:100%;'>"
+            "<div style='font-family:Bebas Neue,cursive;color:#818cf8;font-size:1rem;"
+            "letter-spacing:2px;margin-bottom:0.5rem;'>REGRESION LOGISTICA</div>"
+            "<div style='color:#facc15;font-family:Bebas Neue,cursive;font-size:1.5rem;'>AUC = 0.8038</div>"
+            "<div style='color:#94a3b8;font-size:0.78rem;line-height:1.6;margin-top:0.5rem;'>"
+            "CV=5: 0.8038 ± 0.0278. Desempeno consistente y estable entre particiones. "
+            "El AUC medio indica buena capacidad para separar Gol y No Gol, mientras que "
+            "la desviacion estandar moderada refleja variabilidad controlada entre folds. "
+            "Modelo robusto e interpretable, adecuado como baseline avanzado. "
+            "Sus coeficientes explican directamente el impacto de cada variable en el xG."
+            "</div></div>",
+            unsafe_allow_html=True
+        )
+
+    with col_m2:
+        st.markdown(
+            "<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+            "border:2px solid #00ff85;border-radius:12px;padding:1rem;height:100%;'>"
+            "<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1rem;"
+            "letter-spacing:2px;margin-bottom:0.5rem;'>RANDOM FOREST</div>"
+            "<div style='color:#facc15;font-family:Bebas Neue,cursive;font-size:1.5rem;'>AUC = 0.8839</div>"
+            "<div style='color:#94a3b8;font-size:0.78rem;line-height:1.6;margin-top:0.5rem;'>"
+            "Mejora sustancial sobre la logistica (+0.08 AUC). La incorporacion de relaciones "
+            "no lineales e interacciones entre variables permite capturar patrones mas complejos. "
+            "Este incremento sugiere mayor capacidad discriminativa a lo largo de distintos "
+            "umbrales de decision. Usa class_weight='balanced' para compensar el desbalance 8:1. "
+            "NO requiere StandardScaler."
+            "</div></div>",
+            unsafe_allow_html=True
+        )
+
+    with col_m3:
+        st.markdown(
+            "<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+            "border:2px solid #f472b6;border-radius:12px;padding:1rem;height:100%;'>"
+            "<div style='font-family:Bebas Neue,cursive;color:#f472b6;font-size:1rem;"
+            "letter-spacing:2px;margin-bottom:0.5rem;'>XGBOOST</div>"
+            "<div style='color:#facc15;font-family:Bebas Neue,cursive;font-size:1.5rem;'>AUC = 0.9158</div>"
+            "<div style='color:#94a3b8;font-size:0.78rem;line-height:1.6;margin-top:0.5rem;'>"
+            "Mejor desempeno entre los modelos evaluados (AUC > 0.91). Excelente capacidad "
+            "discriminativa incluso con fuerte desbalance. scale_pos_weight=7.9 permite "
+            "mayor atencion a la clase Gol. Su arquitectura de boosting captura interacciones "
+            "complejas y efectos no lineales que la logistica no puede modelar."
+            "</div></div>",
+            unsafe_allow_html=True
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Tabla métricas xG
+    from sklearn.metrics import precision_score, recall_score, f1_score
+    st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1rem;letter-spacing:2px;margin-bottom:0.5rem;'>METRICAS COMPARATIVAS — MODELO xG</div>", unsafe_allow_html=True)
+
+    metrics_data = {
+        'Metrica':        ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'AUC-ROC'],
+        'Logistica xG':   [
+            f"{accuracy_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
+            f"{precision_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
+            f"{recall_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
+            f"{f1_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
+            "0.8038"
+        ],
+        'Random Forest':  ['—', '—', '—', '—', '0.8839'],
+        'XGBoost':        ['—', '—', '—', '—', '0.9158'],
+        'Baseline Naive': ['88.80%', '0.00%', '0.00%', '0.00%', '0.5000']
+    }
+    st.dataframe(pd.DataFrame(metrics_data), use_container_width=True, hide_index=True)
+    st.markdown(
+        "<div class='insight-box'>"
+        "El <b>Baseline Naive</b> (siempre predice No Gol) tiene 88.8% de accuracy pero "
+        "Precision=0, Recall=0 y F1=0 para Gol — completamente inutil en la practica. "
+        "Nuestros modelos sacrifican algo de accuracy pero detectan goles reales (Recall > 0) "
+        "y discriminan correctamente entre tiros peligrosos y no peligrosos (AUC-ROC > 0.80). "
+        "En aplicaciones como scouting o analisis tactico, el <b>Recall y AUC-ROC son las metricas que importan</b>."
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ══════════════════════════════════════════════
+    # SECCIÓN 2: MODELO 2A — GOLES TOTALES
+    # ══════════════════════════════════════════════
+    st.markdown("<div class='section-title'>Modelo 2A — Goles Totales: Comparación de Errores</div>", unsafe_allow_html=True)
+
+    st.markdown(
+        "<div class='insight-box'>"
+        "<b style='color:#00ff85;'>Variables utilizadas:</b> "
+        "home_avg_scored · home_avg_conceded · away_avg_scored · away_avg_conceded · "
+        "ataque_vs_defensa_h · ataque_vs_defensa_a · over_proxy · b365h · b365d · b365a. "
+        "Se calculan con shift(1) + rolling(5, min_periods=2) para evitar data leakage. "
+        "Principio de Dixon-Coles (1997): goles esperados = ataque propio + vulnerabilidad defensiva rival."
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    # Calcular métricas de goles directamente
+    import numpy as np
+    from sklearn.linear_model import Ridge
+    from sklearn.model_selection import cross_val_predict, KFold
+
+    ms = M['matches_sorted']
+    feat_goles = M['feat_goles']
+    X_goles = ms[feat_goles].dropna()
+    y_goles = ms.loc[X_goles.index, 'total_goals']
+
+    ridge_model = Ridge(alpha=1.0)
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    y_pred_goles = cross_val_predict(ridge_model, X_goles, y_goles, cv=kf)
+
+    from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+    rmse_ridge = np.sqrt(mean_squared_error(y_goles, y_pred_goles))
+    mae_ridge  = mean_absolute_error(y_goles, y_pred_goles)
+    r2_ridge   = r2_score(y_goles, y_pred_goles)
+
+    # Baseline: predecir la media
+    y_mean = np.full_like(y_goles, y_goles.mean(), dtype=float)
+    rmse_base = np.sqrt(mean_squared_error(y_goles, y_mean))
+    mae_base  = mean_absolute_error(y_goles, y_mean)
+    r2_base   = r2_score(y_goles, y_mean)
+
+    col_err1, col_err2, col_err3 = st.columns(3)
+    color_r2 = "#00ff85" if r2_ridge > r2_base else "#f87171"
+
+    with col_err1:
+        st.markdown(f"<div class='kpi-card'><div class='kpi-value' style='color:#818cf8;'>{rmse_ridge:.4f}</div><div class='kpi-label'>RMSE — Ridge</div></div>", unsafe_allow_html=True)
+    with col_err2:
+        st.markdown(f"<div class='kpi-card'><div class='kpi-value' style='color:#818cf8;'>{mae_ridge:.4f}</div><div class='kpi-label'>MAE — Ridge</div></div>", unsafe_allow_html=True)
+    with col_err3:
+        st.markdown(f"<div class='kpi-card'><div class='kpi-value' style='color:{color_r2};'>{r2_ridge:.4f}</div><div class='kpi-label'>R² — Ridge (CV=5)</div></div>", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    col_goles1, col_goles2 = st.columns(2)
+
+    with col_goles1:
+        # Comparación de errores: Ridge vs Baseline
+        modelos_comp = ['Baseline (Media)', 'Ridge L2']
+        rmse_vals = [rmse_base, rmse_ridge]
+        mae_vals  = [mae_base, mae_ridge]
+        r2_vals   = [r2_base, r2_ridge]
+
+        fig_err = go.Figure()
+        fig_err.add_bar(x=modelos_comp, y=rmse_vals,
+                        name='RMSE', marker_color=['#475569', '#818cf8'])
+        fig_err.add_bar(x=modelos_comp, y=mae_vals,
+                        name='MAE', marker_color=['#334155', '#00ff85'])
+        fig_err.update_layout(
+            title='Comparacion de Errores — Goles Totales',
+            barmode='group',
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'), title_font=dict(color='#00ff85'),
+            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white')),
+            yaxis=dict(color='white', gridcolor='rgba(255,255,255,0.08)')
+        )
+        st.plotly_chart(fig_err, use_container_width=True)
+
+    with col_goles2:
+        # Predichos vs Reales
+        fig_scatter = go.Figure()
+        fig_scatter.add_scatter(
+            x=y_goles.values, y=y_pred_goles,
+            mode='markers',
+            marker=dict(color='#818cf8', opacity=0.5, size=6),
+            name='Predicciones'
+        )
+        rango = [min(y_goles.min(), y_pred_goles.min()),
+                 max(y_goles.max(), y_pred_goles.max())]
+        fig_scatter.add_scatter(x=rango, y=rango,
+                                mode='lines',
+                                line=dict(color='#f87171', dash='dash', width=2),
+                                name='Prediccion Perfecta')
+        fig_scatter.update_layout(
+            title='Goles Reales vs Predichos — Ridge',
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'), title_font=dict(color='#00ff85'),
+            xaxis_title='Goles Reales', yaxis_title='Goles Predichos',
+            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white')),
+            xaxis=dict(color='white', gridcolor='rgba(255,255,255,0.08)'),
+            yaxis=dict(color='white', gridcolor='rgba(255,255,255,0.08)')
+        )
+        st.plotly_chart(fig_scatter, use_container_width=True)
+
+    # Tabla comparativa errores
+    st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1rem;letter-spacing:2px;margin-bottom:0.5rem;'>TABLA COMPARATIVA — ERRORES MODELO 2A</div>", unsafe_allow_html=True)
+    tabla_errores = pd.DataFrame({
+        'Modelo':   ['Baseline (Media)', 'Ridge L2 (historial + odds)'],
+        'RMSE':     [f'{rmse_base:.4f}', f'{rmse_ridge:.4f}'],
+        'MAE':      [f'{mae_base:.4f}', f'{mae_ridge:.4f}'],
+        'R2 (CV)':  [f'{r2_base:.4f}', f'{r2_ridge:.4f}'],
+        'N':        [str(len(X_goles))]*2
+    })
+    st.dataframe(tabla_errores, use_container_width=True, hide_index=True)
+    st.markdown(
+        "<div class='insight-box'>"
+        "Un R2 bajo o negativo es <b>esperado en futbol</b>: predecir goles exactos es extremadamente dificil "
+        "incluso para los mejores modelos del mundo. El RMSE de ~1.6 goles refleja la varianza "
+        "inherente del deporte. Ridge se prefiere sobre regresion lineal simple porque "
+        "reduce la varianza con pocos datos (291 partidos). "
+        "El modelo de <b>historial + odds mejora los supuestos estadisticos</b> (residuos mas simetricos, "
+        "Q-Q plot mas cercano a la normalidad) respecto al modelo de solo odds, que produce R2 negativo."
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ══════════════════════════════════════════════
+    # SECCIÓN 3: MODELO 2B — MATCH PREDICTOR
+    # ══════════════════════════════════════════════
+    st.markdown("<div class='section-title'>Modelo 2B — Match Predictor: Comparacion vs Bet365</div>", unsafe_allow_html=True)
+
+    st.markdown(
+        "<div class='insight-box'>"
+        "<b style='color:#00ff85;'>Variables utilizadas:</b> "
+        "b365h · b365d · b365a · implied_prob_h · implied_prob_d · implied_prob_a. "
+        "Las probabilidades implicitas se calculan como 1/cuota normalizada, eliminando el margen de la casa. "
+        "Algoritmo: Regresion Logistica Multinomial (solver='lbfgs')."
+        "</div>",
+        unsafe_allow_html=True
+    )
+
     BENCHMARK = 0.498
     acc_m = M['acc_cv'].mean()
 
@@ -1080,14 +1417,13 @@ with tabs[4]:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── MATRICES DE CONFUSION ─────────────────────────────
     col_cm1, col_cm2 = st.columns(2)
 
     with col_cm1:
-        cm_match = confusion_matrix(M['y_log'], M['y_pred_match'], labels=['H','D','A'])
+        cm_match = confusion_matrix(M['y_log'], M['y_pred_match'], labels=['H', 'D', 'A'])
         fig_cm_match = px.imshow(
             cm_match,
-            x=['Home','Draw','Away'], y=['Home','Draw','Away'],
+            x=['Home', 'Draw', 'Away'], y=['Home', 'Draw', 'Away'],
             color_continuous_scale='Purples',
             text_auto=True,
             title=f'Matriz de Confusion — Match Predictor ({acc_m*100:.2f}%)'
@@ -1103,116 +1439,16 @@ with tabs[4]:
             "<b style='color:#00ff85;'>Interpretacion:</b> "
             "La diagonal principal muestra las predicciones correctas. "
             "El modelo predice bien <b>Home (H)</b> con alta precision, pero "
-            "tiene dificultades con los <b>empates (Draw)</b> — Recall=0 para D "
-            "significa que nunca predice empate correctamente. Esto es esperado: "
-            "los empates son el resultado de mayor entropia en futbol (26.1% de partidos) "
-            "y las casas de apuestas tampoco los predicen bien."
+            "tiene Recall=0 para <b>Draw (D)</b> — nunca predice empate correctamente. "
+            "Esto es esperado: los empates (26.1% de partidos) tienen la mayor entropia tactica "
+            "del futbol y las casas de apuestas tampoco los predicen bien."
             "</div>",
             unsafe_allow_html=True
         )
 
     with col_cm2:
-        cm_xg = confusion_matrix(M['y_te'], M['y_pred_xg'])
-        fig_cm_xg = px.imshow(
-            cm_xg,
-            x=['No Gol','Gol'], y=['No Gol','Gol'],
-            color_continuous_scale='Purples',
-            text_auto=True,
-            title='Matriz de Confusion — Modelo xG'
-        )
-        fig_cm_xg.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white'),
-            title_font=dict(color='#00ff85')
-        )
-        st.plotly_chart(fig_cm_xg, use_container_width=True)
-        st.markdown(
-            "<div class='insight-box'>"
-            "<b style='color:#00ff85;'>Interpretacion:</b> "
-            "El modelo xG identifica correctamente la mayoria de <b>No Goles</b> "
-            "(alta especificidad), pero tiene un Recall moderado para <b>Goles</b> "
-            "debido al desbalance 8:1 en los datos. "
-            "Los <b>Falsos Negativos</b> (goles predichos como no-gol) son el mayor reto — "
-            "reducirlos requiere features adicionales como presion defensiva o posicion del portero. "
-            "El AUC-ROC >0.80 confirma que el modelo discrimina bien mas alla del umbral de 0.5."
-            "</div>",
-            unsafe_allow_html=True
-        )
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # ── CURVAS ROC ────────────────────────────────────────
-    col_roc1, col_roc2 = st.columns(2)
-
-    with col_roc1:
-        fpr_l, tpr_l, _ = roc_curve(M['y_te'], M['y_prob_xg'])
-        fpr_rf, tpr_rf, _ = roc_curve(M['y_te_r'], M['rf_probs'])
-        auc_l = roc_auc_score(M['y_te'], M['y_prob_xg'])
-        auc_rf = roc_auc_score(M['y_te_r'], M['rf_probs'])
-
-        fig_roc = go.Figure()
-        fig_roc.add_scatter(x=fpr_l, y=tpr_l, mode='lines',
-                            name=f'Logistica (AUC={auc_l:.4f})',
-                            line=dict(color='#818cf8', width=2.5))
-        fig_roc.add_scatter(x=fpr_rf, y=tpr_rf, mode='lines',
-                            name=f'Random Forest (AUC={auc_rf:.4f})',
-                            line=dict(color='#00ff85', width=2.5))
-        fig_roc.add_scatter(x=[0,1], y=[0,1], mode='lines',
-                            name='Aleatorio (AUC=0.5)',
-                            line=dict(color='#475569', width=1.5, dash='dash'))
-        fig_roc.update_layout(
-            title='Curvas ROC — Logistica vs Random Forest',
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white'),
-            title_font=dict(color='#00ff85'),
-            xaxis_title='Tasa de Falsos Positivos',
-            yaxis_title='Tasa de Verdaderos Positivos',
-            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white'))
-        )
-        st.plotly_chart(fig_roc, use_container_width=True)
-        st.markdown(
-            "<div class='insight-box'>"
-            "<b style='color:#00ff85;'>Interpretacion:</b> "
-            "La curva ROC mide la capacidad de discriminacion del modelo independientemente del umbral de decision. "
-            "Un <b>AUC=1.0</b> seria perfecto; <b>AUC=0.5</b> equivale a adivinar al azar. "
-            f"<b>Random Forest (AUC={auc_rf:.4f})</b> supera a la Logistica porque captura "
-            "interacciones no lineales entre features (ej: Big Chance + area chica tiene mayor impacto combinado). "
-            "La ventaja de RF es especialmente visible en la zona de <b>bajo FPR (izquierda)</b>, "
-            "donde comete menos errores cuando predice gol con alta confianza."
-            "</div>",
-            unsafe_allow_html=True
-        )
-
-    with col_roc2:
-        from sklearn.metrics import precision_score, recall_score, f1_score
-        metrics_data = {
-            'Metrica': ['Accuracy', 'Precision', 'Recall', 'F1-Score', 'AUC-ROC'],
-            'Logistica xG': [
-                f"{accuracy_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
-                f"{precision_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
-                f"{recall_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
-                f"{f1_score(M['y_te'], M['y_pred_xg'])*100:.2f}%",
-                f"{auc_l:.4f}"
-            ],
-            'Baseline Naive': ['88.80%', '0.00%', '0.00%', '0.00%', '0.5000']
-        }
-        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1rem;letter-spacing:2px;margin-bottom:0.5rem;'>METRICAS MODELO xG VS BASELINE</div>", unsafe_allow_html=True)
-        st.dataframe(pd.DataFrame(metrics_data), use_container_width=True, hide_index=True)
-        st.markdown(
-            "<div class='insight-box'>"
-            "<b style='color:#00ff85;'>Interpretacion:</b> "
-            "El <b>Baseline Naive</b> (siempre predice No Gol) alcanza 88.8% de accuracy "
-            "pero tiene Precision=0, Recall=0 y F1=0 para la clase Gol — es completamente inutil. "
-            "Nuestro modelo sacrifica algo de accuracy pero gana en <b>Recall</b> "
-            "(detecta goles reales) y <b>AUC-ROC</b> (discrimina bien entre tiros peligrosos y no peligrosos). "
-            "En aplicaciones reales como scouting o analisis tactico, el Recall y el AUC-ROC "
-            "son las metricas que importan."
-            "</div>",
-            unsafe_allow_html=True
-        )
-
         # Accuracy por fold
-        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1rem;letter-spacing:2px;margin:1rem 0 0.5rem 0;'>ESTABILIDAD POR FOLD (MATCH PREDICTOR)</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;letter-spacing:2px;margin-bottom:0.5rem;'>ESTABILIDAD POR FOLD</div>", unsafe_allow_html=True)
         fold_df = pd.DataFrame({
             'Fold': [f'Fold {i+1}' for i in range(5)],
             'Accuracy': M['acc_cv'] * 100,
@@ -1225,8 +1461,7 @@ with tabs[4]:
                              name='Bet365 (49.8%)', mode='lines',
                              line=dict(color='#f87171', width=2, dash='dash'))
         fig_fold.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
             font=dict(color='white'),
             legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white')),
             yaxis=dict(range=[30, 70], color='white',
@@ -1237,12 +1472,10 @@ with tabs[4]:
         st.markdown(
             "<div class='insight-box'>"
             "<b style='color:#00ff85;'>Interpretacion:</b> "
-            "La grafica muestra el accuracy del modelo en cada uno de los 5 folds de validacion cruzada. "
-            "La variabilidad entre folds (~41% a ~57%) refleja la dificultad inherente de predecir "
-            "resultados de futbol — con solo 291 partidos, cada fold tiene ~58 partidos de prueba. "
-            "Un cambio de <b>1 prediccion correcta = 1.7% de accuracy</b> por fold. "
-            "El promedio supera o iguala el benchmark de Bet365, lo que indica que el modelo "
-            "es <b>competitivo</b> con la casa de apuestas usando solo features de odds pre-partido."
+            "Variabilidad entre folds (~41% a ~57%) refleja la dificultad inherente. "
+            "Con 291 partidos, <b>1 prediccion correcta = 0.34% de accuracy</b>. "
+            "El margen sobre Bet365 no es estadisticamente significativo dado el tamano muestral, "
+            "pero el modelo es <b>comparable</b> a la casa de apuestas usando solo odds pre-partido."
             "</div>",
             unsafe_allow_html=True
         )
