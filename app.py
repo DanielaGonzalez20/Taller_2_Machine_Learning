@@ -1236,5 +1236,55 @@ with tabs[5]:
             margin=dict(t=40, b=10, l=0, r=10)
         )
         st.plotly_chart(fig_km, use_container_width=True)
+        # --- INTERPRETACIÓN DE CLUSTERS ---
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1.2rem;letter-spacing:3px;margin-bottom:1rem;'>INTERPRETACION DE CLUSTERS</div>", unsafe_allow_html=True)
+
+        cluster_info = {
+            '0': {
+                'nombre': 'Tiros Lejanos',
+                'emoji': '🟤',
+                'color': '#facc15',
+                'desc': 'Disparos desde larga distancia y angulo cerrado. Alta frecuencia pero minima peligrosidad. El portero tiene tiempo de reaccion y el angulo de vision al arco es reducido.',
+                'stats': 'Distancia ~27m | Angulo ~20° | Conversion ~6%'
+            },
+            '1': {
+                'nombre': 'Media Distancia',
+                'emoji': '🔵',
+                'color': '#38bdf8',
+                'desc': 'Zona de transicion entre mediocampo y area. El mayor volumen de tiros de la temporada pero con baja efectividad. Tipicamente remates de larga distancia o tiros precipitados.',
+                'stats': 'Distancia ~16m | Angulo ~30° | Conversion ~5%'
+            },
+            '2': {
+                'nombre': 'Ocasiones Claras',
+                'emoji': '🟢',
+                'color': '#00ff85',
+                'desc': 'Zona de maximo peligro. Tiros dentro del area, frente al arco con angulo amplio. El 97% son Big Chances — el modelo xG asigna probabilidades altas a estos remates.',
+                'stats': 'Distancia ~10m | Angulo ~55° | Conversion ~36%'
+            }
+        }
+
+        cols_interp = st.columns(3)
+        for idx, (cluster_id, info) in enumerate(cluster_info.items()):
+            with cols_interp[idx]:
+                st.markdown(f"""
+<div style='background:linear-gradient(135deg,#37003c,#1a0020);
+            border:2px solid {info["color"]};
+            border-radius:12px;padding:1.2rem;height:100%;
+            box-shadow:0 0 15px {info["color"]}22;'>
+    <div style='font-size:1.8rem;margin-bottom:0.5rem;'>{info["emoji"]}</div>
+    <div style='font-family:Bebas Neue,cursive;color:{info["color"]};
+                font-size:1.1rem;letter-spacing:2px;margin-bottom:0.5rem;'>
+        CLUSTER {cluster_id} — {info["nombre"]}
+    </div>
+    <div style='color:#94a3b8;font-size:0.82rem;line-height:1.6;margin-bottom:0.8rem;'>
+        {info["desc"]}
+    </div>
+    <div style='background:rgba(255,255,255,0.05);border-radius:6px;
+                padding:0.5rem;font-size:0.75rem;color:{info["color"]};
+                font-weight:bold;text-align:center;letter-spacing:1px;'>
+        {info["stats"]}
+    </div>
+</div>""", unsafe_allow_html=True)
 
     st.markdown("<div class='insight-box'>El clustering revela patrones naturales en los tipos de tiro: tiros de larga distancia con bajo xG, remates en el area chica con alta conversion, y Big Chances distribuidas en el centro del area grande.</div>", unsafe_allow_html=True)
