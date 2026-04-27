@@ -552,7 +552,7 @@ with tabs[0]:
             ]}
         ])
 
-    col_tabla, col_interp = st.columns([0.5,2 ])
+    col_tabla, col_interp = st.columns([1,1])
 
     with col_tabla:
         st.markdown(
