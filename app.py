@@ -353,7 +353,7 @@ def draw_pitch_opta(fig, bg="#0a1628"):
 # ─────────────────────────────────────────────
 # HEADER
 # ─────────────────────────────────────────────
-st.markdown("<div class='hero-title' style='font-size:3.2rem;'>Premier League ML Analytics</div>", unsafe_allow_html=True)
+st.markdown("<h1 style='font-family:Bebas Neue,cursive;font-size:clamp(2rem,6vw,5rem);letter-spacing:3px;background:linear-gradient(135deg,#38bdf8 0%,#818cf8 50%,#f472b6 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;line-height:1.1;margin:0;padding:0;white-space:nowrap;overflow:visible;'>Premier League ML Analytics</h1>", unsafe_allow_html=True)
 st.markdown("<div class='hero-sub'>Machine Learning I &mdash; Universidad Externado de Colombia &middot; 2026</div>", unsafe_allow_html=True)
 
 # KPIs globales
