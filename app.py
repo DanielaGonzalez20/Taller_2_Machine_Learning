@@ -561,32 +561,22 @@ with tabs[0]:
         )
 
     with col_interp:
-        st.markdown("""
-<div style='background:linear-gradient(135deg,#37003c,#1a0020);border:1px solid #00ff85;border-radius:12px;padding:1.2rem;height:100%;'>
-
+        st.markdown("""<div style='background:linear-gradient(135deg,#37003c,#1a0020);border:1px solid #00ff85;border-radius:12px;padding:1.2rem;'>
 <div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1.1rem;letter-spacing:2px;margin-bottom:1rem;'>INTERPRETACION</div>
-
-<div style='color:#94a3b8;font-size:0.85rem;line-height:1.7;margin-bottom:1rem;'>
-La columna <b style='color:white;'>Diferencia xG</b> mide si un jugador convierte mas o menos goles de los que estadisticamente deberia.
-</div>
-
+<div style='color:#94a3b8;font-size:0.85rem;line-height:1.7;margin-bottom:1rem;'>La columna <b style='color:white;'>Diferencia xG</b> mide si un jugador convierte mas o menos goles de los que estadisticamente deberia.</div>
 <div style='margin-bottom:0.8rem;padding:0.6rem;background:rgba(0,255,133,0.08);border-radius:8px;border-left:3px solid #00ff85;'>
 <div style='color:#00ff85;font-size:0.8rem;font-weight:bold;'>SOBRERRENDIDORES</div>
 <div style='color:#94a3b8;font-size:0.8rem;'>Semenyo (+5.07) y Wilson (+4.16) convierten muy por encima de su xG. Pueden estar en racha o tener habilidad especial de finalizacion.</div>
 </div>
-
 <div style='margin-bottom:0.8rem;padding:0.6rem;background:rgba(248,113,113,0.08);border-radius:8px;border-left:3px solid #f87171;'>
 <div style='color:#f87171;font-size:0.8rem;font-weight:bold;'>BAJORRENDIDORES</div>
 <div style='color:#94a3b8;font-size:0.8rem;'>Calvert-Lewin (-1.21) genera mejores ocasiones de las que convierte. Su xG sugiere que deberia tener mas goles.</div>
 </div>
-
 <div style='padding:0.6rem;background:rgba(0,255,133,0.05);border-radius:8px;border-left:3px solid #818cf8;'>
 <div style='color:#818cf8;font-size:0.8rem;font-weight:bold;'>HAALAND</div>
 <div style='color:#94a3b8;font-size:0.8rem;'>22 goles con 21.06 xG - perfectamente calibrado. No es suerte, es eficiencia sistematica sostenida.</div>
 </div>
-
-</div>
-""", unsafe_allow_html=True)
+</div>""", unsafe_allow_html=True)
 # ═══════════════════════════════════════════════
 # TAB 2: SHOT MAP
 # ═══════════════════════════════════════════════
