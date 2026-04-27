@@ -533,7 +533,7 @@ with tabs[0]:
         st.markdown("<div class='insight-box'>🏠 El local gana el <b>42.3%</b> de los partidos — la ventaja de localía es real. Los <b>empates (26.1%)</b> son el resultado mas difícil de predecir: el modelo logístico tiene Recall=0 para Draw, lo que refleja la alta aleatoriedad táctica de este resultado.</div>", unsafe_allow_html=True)
 
     # Top goleadores
-    st.markdown("<div class='section-title'>Top Goleadores</div>", unsafe_allow_html=True)
+st.markdown("<div class='section-title'>Top Goleadores</div>", unsafe_allow_html=True)
     top10 = players.nlargest(10, 'goals_scored')[
         ['web_name','team','position','goals_scored','xG']].copy()
     top10['xG'] = pd.to_numeric(top10['xG'], errors='coerce').round(2)
@@ -544,7 +544,6 @@ with tabs[0]:
         'xG': 'xG Esperado'
     })
 
-    # Colorear diferencia xG
     def color_diff(val):
         if val > 0:
             return 'color: #00ff85; font-weight: bold'
@@ -553,27 +552,22 @@ with tabs[0]:
         return 'color: white'
 
     styled = top10.style\
-        .applymap(color_diff, subset=['Diferencia xG'])\
+        .map(color_diff, subset=['Diferencia xG'])\
         .set_properties(**{
             'background-color': '#0a0012',
             'color': 'white',
-            'border-color': '#37003c'
         })\
         .set_table_styles([
             {'selector': 'th', 'props': [
                 ('background-color', '#37003c'),
                 ('color', '#00ff85'),
                 ('font-weight', 'bold'),
-                ('letter-spacing', '1px'),
                 ('border', '1px solid #00ff85'),
                 ('padding', '8px 12px')
             ]},
             {'selector': 'td', 'props': [
                 ('border', '1px solid rgba(0,255,133,0.15)'),
                 ('padding', '8px 12px')
-            ]},
-            {'selector': 'tr:hover td', 'props': [
-                ('background-color', 'rgba(0,255,133,0.08)')
             ]}
         ])
 
