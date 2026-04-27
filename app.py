@@ -591,11 +591,12 @@ with tabs[1]:
     with c_filter3:
         filtro_equipo = st.selectbox("Equipo", ["Todos"] + sorted(shots_final['team_name'].dropna().unique().tolist()))
 
-    # Calcular xG con el modelo
+    # Calcular xG PRIMERO antes de filtrar
     features_xg = M['features_xg']
     X_all = shots_final[features_xg].fillna(0)
     shots_final['xg_pred'] = M['model_xg'].predict_proba(M['scaler'].transform(X_all))[:, 1]
 
+    # Aplicar filtros
     df_map = shots_final.copy()
     if filtro_tipo == "Solo Goles":
         df_map = df_map[df_map['is_goal'] == 1]
@@ -606,106 +607,123 @@ with tabs[1]:
     if filtro_equipo != "Todos":
         df_map = df_map[df_map['team_name'] == filtro_equipo]
 
-    df_map = df_map[df_map['x'].between(0, 100) & df_map['y'].between(0, 100)]
-
+    # Filtrar coordenadas válidas
     df_map = df_map[df_map['x'].notna() & df_map['y'].notna()]
     df_map = df_map[(df_map['x'] >= 0) & (df_map['x'] <= 105) &
                     (df_map['y'] >= 0) & (df_map['y'] <= 100)]
 
     fig_map = go.Figure()
 
-    # Puntos de tiros
+    # ── CANCHA VERDE ──────────────────────────────
+    lc = "rgba(255,255,255,0.95)"
+
+    # Franjas verdes
+    for i in range(10):
+        color = "#2d6e1a" if i % 2 == 0 else "#347d1e"
+        fig_map.add_shape(type="rect",
+                          x0=i*10, y0=0, x1=(i+1)*10, y1=100,
+                          fillcolor=color, line=dict(width=0), layer="below")
+
+    # Borde exterior
+    fig_map.add_shape(type="rect", x0=0, y0=0, x1=100, y1=100,
+                      line=dict(color=lc, width=2.5), layer="below")
+    # Línea media
+    fig_map.add_shape(type="line", x0=50, y0=0, x1=50, y1=100,
+                      line=dict(color=lc, width=2), layer="below")
+    # Círculo central
+    fig_map.add_shape(type="circle", x0=41, y0=41, x1=59, y1=59,
+                      line=dict(color=lc, width=2), layer="below")
+    # Punto central
+    fig_map.add_shape(type="circle", x0=49, y0=49, x1=51, y1=51,
+                      fillcolor=lc, line=dict(color=lc), layer="below")
+    # Área grande derecha
+    fig_map.add_shape(type="rect", x0=83, y0=21.1, x1=100, y1=78.9,
+                      line=dict(color=lc, width=2), layer="below")
+    # Área chica derecha
+    fig_map.add_shape(type="rect", x0=94, y0=36.8, x1=100, y1=63.2,
+                      line=dict(color=lc, width=2), layer="below")
+    # Portería derecha
+    fig_map.add_shape(type="rect", x0=100, y0=45.2, x1=102, y1=54.8,
+                      line=dict(color=lc, width=2),
+                      fillcolor="rgba(255,255,255,0.3)", layer="below")
+    # Semicírculo derecho
+    fig_map.add_shape(type="circle", x0=77, y0=42, x1=89, y1=58,
+                      line=dict(color=lc, width=2), layer="below")
+    # Punto penal derecho
+    fig_map.add_shape(type="circle", x0=88.5, y0=49.3, x1=89.5, y1=50.7,
+                      fillcolor=lc, line=dict(color=lc), layer="below")
+    # Área grande izquierda
+    fig_map.add_shape(type="rect", x0=0, y0=21.1, x1=17, y1=78.9,
+                      line=dict(color=lc, width=2), layer="below")
+    # Área chica izquierda
+    fig_map.add_shape(type="rect", x0=0, y0=36.8, x1=6, y1=63.2,
+                      line=dict(color=lc, width=2), layer="below")
+    # Portería izquierda
+    fig_map.add_shape(type="rect", x0=-2, y0=45.2, x1=0, y1=54.8,
+                      line=dict(color=lc, width=2),
+                      fillcolor="rgba(255,255,255,0.3)", layer="below")
+    # Semicírculo izquierdo
+    fig_map.add_shape(type="circle", x0=11, y0=42, x1=23, y1=58,
+                      line=dict(color=lc, width=2), layer="below")
+    # Punto penal izquierdo
+    fig_map.add_shape(type="circle", x0=10.5, y0=49.3, x1=11.5, y1=50.7,
+                      fillcolor=lc, line=dict(color=lc), layer="below")
+    # Esquinas
+    for cx, cy in [(0,0),(0,100),(100,0),(100,100)]:
+        fig_map.add_shape(type="circle",
+                          x0=cx-3, y0=cy-3, x1=cx+3, y1=cy+3,
+                          line=dict(color=lc, width=1.5), layer="below")
+
+    # ── PUNTOS DE TIROS (encima de la cancha) ─────
     fig_map.add_trace(go.Scatter(
         x=df_map['x'],
         y=df_map['y'],
         mode='markers',
         marker=dict(
-            size=8,
+            size=7,
             color=df_map['xg_pred'],
             colorscale='RdYlGn',
             cmin=0, cmax=1,
-            opacity=0.8,
-            colorbar=dict(title='xG', tickfont=dict(color='white')),
+            opacity=0.85,
+            colorbar=dict(
+                title='xG',
+                tickfont=dict(color='white'),
+                titlefont=dict(color='white')
+            ),
             line=dict(color='white', width=0.5)
         ),
         text=[f"xG: {x:.3f}<br>Min: {m}<br>Equipo: {t}<br>Gol: {'Si' if g else 'No'}"
-              for x, m, t, g in zip(df_map['xg_pred'],
-                                     df_map['minute'],
-                                     df_map['team_name'],
-                                     df_map['is_goal'])],
+              for x, m, t, g in zip(
+                  df_map['xg_pred'],
+                  df_map['minute'],
+                  df_map['team_name'],
+                  df_map['is_goal'])],
         hoverinfo='text',
         name='Tiros'
     ))
-
-    # Cancha verde con líneas
-    # Fondo verde
-    fig_map.add_shape(type="rect", x0=0, y0=0, x1=100, y1=100,
-                      fillcolor="#2d6e1a", line=dict(color="white", width=2))
-    # Franjas
-    for i in range(10):
-        color = "#2d6e1a" if i % 2 == 0 else "#347d1e"
-        fig_map.add_shape(type="rect", x0=i*10, y0=0, x1=(i+1)*10, y1=100,
-                          fillcolor=color, line=dict(width=0), layer="below")
-
-    lc = "rgba(255,255,255,0.9)"
-    # Borde
-    fig_map.add_shape(type="rect", x0=0, y0=0, x1=100, y1=100,
-                      line=dict(color=lc, width=2), fillcolor="rgba(0,0,0,0)")
-    # Línea media
-    fig_map.add_shape(type="line", x0=50, y0=0, x1=50, y1=100,
-                      line=dict(color=lc, width=2))
-    # Círculo central
-    fig_map.add_shape(type="circle", x0=41, y0=41, x1=59, y1=59,
-                      line=dict(color=lc, width=2))
-    # Punto central
-    fig_map.add_shape(type="circle", x0=49, y0=49, x1=51, y1=51,
-                      fillcolor=lc, line=dict(color=lc))
-    # Área grande derecha
-    fig_map.add_shape(type="rect", x0=83, y0=21.1, x1=100, y1=78.9,
-                      line=dict(color=lc, width=2))
-    # Área chica derecha
-    fig_map.add_shape(type="rect", x0=94, y0=36.8, x1=100, y1=63.2,
-                      line=dict(color=lc, width=2))
-    # Portería derecha
-    fig_map.add_shape(type="rect", x0=100, y0=45.2, x1=102, y1=54.8,
-                      line=dict(color=lc, width=2),
-                      fillcolor="rgba(255,255,255,0.2)")
-    # Semicírculo área derecha
-    fig_map.add_shape(type="circle", x0=77, y0=42, x1=89, y1=58,
-                      line=dict(color=lc, width=2))
-    # Punto penal derecho
-    fig_map.add_shape(type="circle", x0=88.5, y0=49, x1=89.5, y1=51,
-                      fillcolor=lc, line=dict(color=lc))
-    # Área grande izquierda
-    fig_map.add_shape(type="rect", x0=0, y0=21.1, x1=17, y1=78.9,
-                      line=dict(color=lc, width=2))
-    # Área chica izquierda
-    fig_map.add_shape(type="rect", x0=0, y0=36.8, x1=6, y1=63.2,
-                      line=dict(color=lc, width=2))
-    # Portería izquierda
-    fig_map.add_shape(type="rect", x0=-2, y0=45.2, x1=0, y1=54.8,
-                      line=dict(color=lc, width=2),
-                      fillcolor="rgba(255,255,255,0.2)")
-    # Semicírculo área izquierda
-    fig_map.add_shape(type="circle", x0=11, y0=42, x1=23, y1=58,
-                      line=dict(color=lc, width=2))
-    # Punto penal izquierdo
-    fig_map.add_shape(type="circle", x0=10.5, y0=49, x1=11.5, y1=51,
-                      fillcolor=lc, line=dict(color=lc))
 
     fig_map.update_layout(
         title=f'Shot Map - {filtro_equipo} ({len(df_map):,} tiros)',
         title_font=dict(color='#00ff85', size=14),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='#2d6e1a',
-        height=600,
+        height=580,
         font=dict(color='white'),
-        xaxis=dict(range=[-4, 104], showgrid=False, visible=False),
-        yaxis=dict(range=[-4, 104], showgrid=False, visible=False,
-                   scaleanchor='x', scaleratio=1),
-        margin=dict(t=40, b=10, l=10, r=10)
+        xaxis=dict(range=[-4, 104], showgrid=False, visible=False,
+                   scaleanchor='y', scaleratio=0.68),
+        yaxis=dict(range=[-4, 104], showgrid=False, visible=False),
+        margin=dict(t=40, b=10, l=10, r=80),
+        showlegend=False
     )
     st.plotly_chart(fig_map, use_container_width=True)
+
+    m1, m2, m3 = st.columns(3)
+    with m1:
+        st.metric("Tiros Mostrados", f"{len(df_map):,}")
+    with m2:
+        st.metric("Goles", f"{int(df_map['is_goal'].sum()):,}")
+    with m3:
+        st.metric("xG Promedio Predicho", f"{df_map['xg_pred'].mean():.3f}")
 
 # ═══════════════════════════════════════════════
 # TAB 3: MODELO xG INTERACTIVO
