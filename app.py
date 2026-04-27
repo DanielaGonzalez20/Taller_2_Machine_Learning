@@ -701,17 +701,16 @@ with tabs[1]:
         name='Tiros'
     ))
 
-    fig_map.update_layout(
+   fig_map.update_layout(
         title=f'Shot Map - {filtro_equipo} ({len(df_map):,} tiros)',
         title_font=dict(color='#00ff85', size=14),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='#2d6e1a',
-        height=580,
+        height=550,
         font=dict(color='white'),
-        xaxis=dict(range=[-4, 104], showgrid=False, visible=False,
-                   scaleanchor='y', scaleratio=0.68),
-        yaxis=dict(range=[-4, 104], showgrid=False, visible=False),
-        margin=dict(t=40, b=10, l=10, r=80),
+        xaxis=dict(range=[-5, 105], showgrid=False, visible=False),
+        yaxis=dict(range=[-5, 105], showgrid=False, visible=False),
+        margin=dict(t=40, b=10, l=0, r=80),
         showlegend=False
     )
     st.plotly_chart(fig_map, use_container_width=True)
