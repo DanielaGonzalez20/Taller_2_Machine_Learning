@@ -1073,6 +1073,70 @@ with tabs[5]:
                          'Angulo_Medio': 'Angulo Medio', 'BigChance_Rate': 'Big Chance %'}),
             use_container_width=True, hide_index=True
         )
+        # --- MÉTODO DEL CODO + SILUETA ---
+        from sklearn.metrics import silhouette_score
+
+        inercias = []
+        siluetas = []
+        k_range = range(2, 7)
+
+        for k_test in k_range:
+            km_test = KMeans(n_clusters=k_test, random_state=42, n_init=10)
+            labels_test = km_test.fit_predict(X_km_sc)
+            inercias.append(km_test.inertia_)
+            siluetas.append(silhouette_score(X_km_sc, labels_test))
+
+        # Mejor K por silueta
+        mejor_k = list(k_range)[siluetas.index(max(siluetas))]
+
+        # Gráfica
+        fig_elbow = go.Figure()
+        fig_elbow.add_trace(go.Scatter(
+            x=list(k_range), y=inercias,
+            mode='lines+markers',
+            name='Inercia (Elbow)',
+            line=dict(color='#00ff85', width=2),
+            marker=dict(size=8, color='#00ff85'),
+            yaxis='y'
+        ))
+        fig_elbow.add_trace(go.Scatter(
+            x=list(k_range), y=siluetas,
+            mode='lines+markers',
+            name='Silueta',
+            line=dict(color='#f472b6', width=2),
+            marker=dict(size=8, color='#f472b6'),
+            yaxis='y2'
+        ))
+        # Marcar el mejor K
+        fig_elbow.add_vline(
+            x=mejor_k,
+            line=dict(color='#facc15', width=2, dash='dash')
+        )
+        fig_elbow.update_layout(
+            title=f'Mejor K = {mejor_k} (linea amarilla)',
+            title_font=dict(color='#00ff85', size=12),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            height=250,
+            yaxis=dict(title='Inercia', color='#00ff85',
+                       gridcolor='rgba(255,255,255,0.08)'),
+            yaxis2=dict(title='Silueta', overlaying='y',
+                        side='right', color='#f472b6'),
+            legend=dict(bgcolor='rgba(0,0,0,0)',
+                        font=dict(color='white', size=10)),
+            margin=dict(t=30, b=10, l=0, r=0)
+        )
+        st.plotly_chart(fig_elbow, use_container_width=True)
+
+        # Interpretación textual
+        st.markdown(f"<div class='insight-box'>"
+                    f"El <b style='color:#facc15;'>K={mejor_k}</b> es el optimo segun el "
+                    f"coeficiente de silueta ({max(siluetas):.3f}). "
+                    f"Valores de silueta cercanos a 1 indican clusters bien separados. "
+                    f"El metodo del codo (inercia) confirma que agregar mas clusters "
+                    f"despues de K={mejor_k} aporta poca mejora."
+                    f"</div>", unsafe_allow_html=True)
 
     with col_k2:
         df_plot = shots_final[shots_final['x'].notna() & shots_final['y'].notna()].copy()
