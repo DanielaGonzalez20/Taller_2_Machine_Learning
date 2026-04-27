@@ -270,6 +270,14 @@ def train_all_models(shots_df, matches_df):
                                  class_weight='balanced', random_state=42, n_jobs=-1)
     rf.fit(X_tr_r, y_tr_r)
     rf_probs = rf.predict_proba(X_te_r)[:, 1]
+    from xgboost import XGBClassifier
+    ratio_clases = (y_xg==0).sum() / (y_xg==1).sum()
+    xgb = XGBClassifier(n_estimators=200, learning_rate=0.05, max_depth=4,
+                         subsample=0.8, colsample_bytree=0.8,
+                         scale_pos_weight=ratio_clases,
+                         eval_metric='logloss', random_state=42, verbosity=0)
+    xgb.fit(X_tr_r, y_tr_r)
+    xgb_probs = xgb.predict_proba(X_te_r)[:, 1]
 
     # — MODELO MATCH PREDICTOR —
     feat_match = ['b365h', 'b365d', 'b365a',
@@ -314,12 +322,13 @@ def train_all_models(shots_df, matches_df):
         'X_te_sc': X_te_sc, 'y_te': y_te,
         'y_pred_xg': y_pred_xg, 'y_prob_xg': y_prob_xg,
         'rf': rf, 'rf_probs': rf_probs, 'y_te_r': y_te_r,
+        'xgb': xgb, 'xgb_probs': xgb_probs,        # ← NUEVO
         'log_match': log_match, 'feat_match': feat_match,
         'acc_cv': acc_cv, 'y_pred_match': y_pred_match,
         'X_log': X_log, 'y_log': y_log,
         'ridge': ridge, 'feat_goles': feat_goles,
         'matches_sorted': matches_sorted
-    }
+     }
 
 M = train_all_models(shots_final, matches)
 
@@ -1155,23 +1164,70 @@ with tabs[4]:
         st.plotly_chart(fig_roc, use_container_width=True)
 
     with col_roc2:
+        # COEFICIENTES del modelo logístico
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;letter-spacing:2px;margin-bottom:0.5rem;'>COEFICIENTES — REGRESION LOGISTICA xG</div>", unsafe_allow_html=True)
+
+        coef_df = pd.DataFrame({
+            'Feature': M['features_xg'],
+            'Coeficiente': M['model_xg'].coef_[0]
+        }).sort_values('Coeficiente', ascending=True)
+
+        fig_coef = go.Figure(go.Bar(
+            x=coef_df['Coeficiente'],
+            y=coef_df['Feature'],
+            orientation='h',
+            marker_color=['#f87171' if c < 0 else '#00ff85' for c in coef_df['Coeficiente']],
+            text=[f'{c:.3f}' for c in coef_df['Coeficiente']],
+            textposition='outside'
+        ))
+        fig_coef.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            xaxis=dict(color='white', gridcolor='rgba(255,255,255,0.08)'),
+            yaxis=dict(color='white'),
+            height=320,
+            margin=dict(t=10, b=10)
+        )
+        st.plotly_chart(fig_coef, use_container_width=True)
+        st.markdown(
+            "<div class='insight-box'>"
+            "<b style='color:#00ff85;'>Interpretacion de coeficientes:</b> "
+            "Verde = aumenta xG | Rojo = disminuye xG. "
+            "<b>is_big_chance e is_penalty</b> tienen los mayores coeficientes positivos. "
+            "<b>angulo_zona</b> positivo confirma: mayor zona = mayor apertura = mayor xG. "
+            "<b>is_header</b> negativo confirma que los cabezazos no son mas efectivos que el promedio. "
+            "Esta interpretabilidad directa es la ventaja clave de la logistica sobre RF y XGBoost."
+            "</div>",
+            unsafe_allow_html=True
+        )
+
+        # Matriz de confusión debajo
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;letter-spacing:2px;margin:0.8rem 0 0.5rem 0;'>MATRIZ DE CONFUSION — xG</div>", unsafe_allow_html=True)
         cm_xg = confusion_matrix(M['y_te'], M['y_pred_xg'])
         fig_cm_xg = px.imshow(
             cm_xg,
             x=['No Gol', 'Gol'], y=['No Gol', 'Gol'],
             color_continuous_scale='Purples',
-            text_auto=True,
-            title='Matriz de Confusion — Modelo xG (Logistica)'
+            text_auto=True
         )
         fig_cm_xg.update_layout(
             paper_bgcolor='rgba(0,0,0,0)',
             font=dict(color='white'),
-            title_font=dict(color='#00ff85')
+            height=280,
+            margin=dict(t=10, b=10)
         )
         st.plotly_chart(fig_cm_xg, use_container_width=True)
-
-    # Interpretaciones textuales de cada modelo
-    st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1rem;letter-spacing:2px;margin:1rem 0 0.5rem 0;'>INTERPRETACION POR MODELO</div>", unsafe_allow_html=True)
+        st.markdown(
+            "<div class='insight-box'>"
+            "<b style='color:#00ff85;'>Que aporta esta matriz:</b> "
+            "Revela el tipo de errores del modelo. Los <b>Falsos Negativos</b> (goles predichos como no-gol) "
+            "son el mayor problema en un dataset 8:1 — el modelo tiende a predecir 'No Gol' por defecto. "
+            "Los <b>Falsos Positivos</b> (no-goles predichos como gol) son igualmente informativos: "
+            "indican tiros en buena posicion que el portero o la defensa resolvieron. "
+            "El AUC-ROC complementa la matriz al evaluar el modelo en todos los umbrales posibles."
+            "</div>",
+            unsafe_allow_html=True
+        )
 
     col_m1, col_m2, col_m3 = st.columns(3)
 
