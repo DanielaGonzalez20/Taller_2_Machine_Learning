@@ -551,28 +551,35 @@ def color_diff(val):
             return 'color: #f87171; font-weight: bold'
         return 'color: white'
 
-styled = top10.style\
+ styled = top10.style\
         .map(color_diff, subset=['Diferencia xG'])\
+        .format({'xG Esperado': '{:.2f}', 'Diferencia xG': '{:.2f}'})\
+        .hide(axis='index')\
         .set_properties(**{
             'background-color': '#0a0012',
             'color': 'white',
+            'width': '100%'
         })\
         .set_table_styles([
+            {'selector': 'table', 'props': [
+                ('width', '100%'),
+                ('border-collapse', 'collapse')
+            ]},
             {'selector': 'th', 'props': [
                 ('background-color', '#37003c'),
                 ('color', '#00ff85'),
                 ('font-weight', 'bold'),
                 ('border', '1px solid #00ff85'),
-                ('padding', '8px 12px')
+                ('padding', '10px 16px'),
+                ('text-align', 'left')
             ]},
             {'selector': 'td', 'props': [
                 ('border', '1px solid rgba(0,255,133,0.15)'),
-                ('padding', '8px 12px')
+                ('padding', '10px 16px')
             ]}
         ])
 
-st.write(styled.to_html(), unsafe_allow_html=True)
-
+    st.write(styled.to_html(), unsafe_allow_html=True)
 # ═══════════════════════════════════════════════
 # TAB 2: SHOT MAP
 # ═══════════════════════════════════════════════
