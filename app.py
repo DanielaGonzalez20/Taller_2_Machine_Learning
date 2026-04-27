@@ -533,25 +533,25 @@ with tabs[0]:
         st.markdown("<div class='insight-box'>🏠 El local gana el <b>42.3%</b> de los partidos — la ventaja de localía es real. Los <b>empates (26.1%)</b> son el resultado mas difícil de predecir: el modelo logístico tiene Recall=0 para Draw, lo que refleja la alta aleatoriedad táctica de este resultado.</div>", unsafe_allow_html=True)
 
     # Top goleadores
-st.markdown("<div class='section-title'>Top Goleadores</div>", unsafe_allow_html=True)
-top10 = players.nlargest(10, 'goals_scored')[
+ st.markdown("<div class='section-title'>Top Goleadores</div>", unsafe_allow_html=True)
+ top10 = players.nlargest(10, 'goals_scored')[
         ['web_name','team','position','goals_scored','xG']].copy()
-top10['xG'] = pd.to_numeric(top10['xG'], errors='coerce').round(2)
-top10['Diferencia xG'] = (top10['goals_scored'] - top10['xG']).round(2)
-top10 = top10.rename(columns={
+ top10['xG'] = pd.to_numeric(top10['xG'], errors='coerce').round(2)
+ top10['Diferencia xG'] = (top10['goals_scored'] - top10['xG']).round(2)
+ top10 = top10.rename(columns={
         'web_name': 'Jugador', 'team': 'Equipo',
         'position': 'Posicion', 'goals_scored': 'Goles',
         'xG': 'xG Esperado'
-})
+ })
 
-def color_diff(val):
+ def color_diff(val):
         if val > 0:
             return 'color: #00ff85; font-weight: bold'
         elif val < 0:
             return 'color: #f87171; font-weight: bold'
         return 'color: white'
 
-styled = top10.style\
+ styled = top10.style\
         .map(color_diff, subset=['Diferencia xG'])\
         .format({'xG Esperado': '{:.2f}', 'Diferencia xG': '{:.2f}'})\
         .hide(axis='index')\
@@ -583,7 +583,7 @@ styled = top10.style\
             ]}
         ])
 
-st.write(styled.to_html(), unsafe_allow_html=True)
+ st.write(styled.to_html(), unsafe_allow_html=True)
 # ═══════════════════════════════════════════════
 # TAB 2: SHOT MAP
 # ═══════════════════════════════════════════════
