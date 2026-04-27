@@ -709,7 +709,7 @@ with tabs[1]:
         font=dict(color='white'),
         xaxis=dict(range=[-5, 105], showgrid=False, visible=False),
         yaxis=dict(range=[-5, 105], showgrid=False, visible=False),
-        margin=dict(t=40, b=10, l=0, r=80),
+        margin=dict(t=40, b=10, l=80, r=120),
         showlegend=False
     )
     st.plotly_chart(fig_map, use_container_width=True)
