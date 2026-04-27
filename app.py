@@ -814,21 +814,234 @@ with tabs[2]:
         st.plotly_chart(fig_ref, use_container_width=True)
 
 # ═══════════════════════════════════════════════
+# TAB 3: MODELO xG INTERACTIVO
+# ═══════════════════════════════════════════════
+with tabs[2]:
+    st.markdown("<div class='section-title'>Modelo xG — Calculadora Interactiva</div>", unsafe_allow_html=True)
+
+    # Texto introductorio
+    st.markdown(
+        "<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+        "border:1px solid #00ff85;border-radius:12px;padding:1.2rem 1.8rem;"
+        "margin-bottom:1.5rem;'>"
+        "<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1.1rem;"
+        "letter-spacing:3px;margin-bottom:0.6rem;'>QUE ES EL EXPECTED GOALS (xG)?</div>"
+        "<p style='color:#94a3b8;font-size:0.9rem;line-height:1.7;margin-bottom:0.6rem;'>"
+        "El <b style='color:white;'>Expected Goals (xG)</b> es la metrica revolucionaria del futbol moderno. "
+        "Mide la <b style='color:white;'>probabilidad de que un tiro termine en gol</b>, "
+        "basandose en la posicion del disparo, el angulo, la distancia y las circunstancias tacticas. "
+        "No todos los tiros son iguales: un remate desde el area chica frente al arco tiene xG alto, "
+        "mientras que un disparo de larga distancia en angulo cerrado tiene xG casi nulo."
+        "</p>"
+        "<div style='display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.5rem;'>"
+        "<div style='background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);"
+        "border-radius:8px;padding:0.5rem 1rem;'>"
+        "<div style='color:#00ff85;font-size:0.75rem;font-weight:bold;'>CONVERSION PROMEDIO</div>"
+        "<div style='color:white;font-family:Bebas Neue,cursive;font-size:1.3rem;'>11.2%</div>"
+        "</div>"
+        "<div style='background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.2);"
+        "border-radius:8px;padding:0.5rem 1rem;'>"
+        "<div style='color:#818cf8;font-size:0.75rem;font-weight:bold;'>BIG CHANCE</div>"
+        "<div style='color:white;font-family:Bebas Neue,cursive;font-size:1.3rem;'>36.6%</div>"
+        "</div>"
+        "<div style='background:rgba(244,114,182,0.08);border:1px solid rgba(244,114,182,0.2);"
+        "border-radius:8px;padding:0.5rem 1rem;'>"
+        "<div style='color:#f472b6;font-size:0.75rem;font-weight:bold;'>PENAL</div>"
+        "<div style='color:white;font-family:Bebas Neue,cursive;font-size:1.3rem;'>82.9%</div>"
+        "</div>"
+        "<div style='background:rgba(250,204,21,0.08);border:1px solid rgba(250,204,21,0.2);"
+        "border-radius:8px;padding:0.5rem 1rem;'>"
+        "<div style='color:#facc15;font-size:0.75rem;font-weight:bold;'>TIROS ANALIZADOS</div>"
+        "<div style='color:white;font-family:Bebas Neue,cursive;font-size:1.3rem;'>7,198</div>"
+        "</div>"
+        "</div>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+    col_inp, col_out = st.columns([1, 1.5])
+
+    with col_inp:
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;letter-spacing:2px;margin-bottom:0.5rem;'>CONFIGURA EL TIRO</div>", unsafe_allow_html=True)
+        angulo_input = st.slider("Angulo de vision al arco (grados)", 0.0, 90.0, 25.0, 0.5)
+        zona = 0
+        if angulo_input <= 11: zona = 0
+        elif angulo_input <= 28: zona = 1
+        elif angulo_input <= 57: zona = 2
+        elif angulo_input <= 86: zona = 3
+        else: zona = 4
+
+        zona_nombres = {
+            0: "Zona 0 — Casi imposible",
+            1: "Zona 1 — Costado area",
+            2: "Zona 2 — Borde area",
+            3: "Zona 3 — Interior area",
+            4: "Zona 4 — Frente al arco"
+        }
+        st.info(f"Ubicacion: {zona_nombres[zona]}")
+
+        is_bc  = st.checkbox("Big Chance?", value=False)
+        is_pen = st.checkbox("Penal?", value=False)
+        is_hd  = st.checkbox("Cabezazo?", value=False)
+        is_fb  = st.checkbox("Contraataque?", value=False)
+        is_ft  = st.checkbox("Primer toque?", value=False)
+        is_ag  = st.checkbox("Dentro del area grande?", value=True)
+        is_ac  = st.checkbox("Dentro del area chica?", value=False)
+        is_fm  = st.checkbox("Minuto 85+?", value=False)
+
+        x_pred_raw = {
+            'angulo_zona': zona,
+            'is_big_chance': int(is_bc),
+            'is_penalty': int(is_pen),
+            'is_header': int(is_hd),
+            'is_fast_break': int(is_fb),
+            'first_touch': int(is_ft),
+            'en_area_grande': int(is_ag),
+            'en_area_chica': int(is_ac),
+            'is_final_minutes': int(is_fm)
+        }
+        if 'goal_mouth_z' in M['features_xg']:
+            x_pred_raw['goal_mouth_z'] = 1.5
+
+        X_pred = pd.DataFrame([x_pred_raw])[M['features_xg']]
+        X_pred_sc = M['scaler'].transform(X_pred)
+        xg_prob = M['model_xg'].predict_proba(X_pred_sc)[0][1]
+
+        # Interpretacion del resultado
+        if xg_prob >= 0.4:
+            nivel = "ALTO PELIGRO"
+            color_nivel = "#00ff85"
+            desc_nivel = "Ocasion de gol muy clara. El portero tiene pocas chances de detenerlo."
+        elif xg_prob >= 0.15:
+            nivel = "PELIGRO MODERADO"
+            color_nivel = "#facc15"
+            desc_nivel = "Tiro con opciones reales de gol. La posicion y contexto favorecen al atacante."
+        else:
+            nivel = "BAJO PELIGRO"
+            color_nivel = "#f87171"
+            desc_nivel = "Tiro de baja conversion. El portero o la geometria trabajan a favor de la defensa."
+
+        st.markdown(
+            f"<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+            f"border-left:4px solid {color_nivel};border-radius:0 8px 8px 0;"
+            f"padding:0.7rem 1rem;margin-top:0.8rem;'>"
+            f"<div style='font-family:Bebas Neue,cursive;color:{color_nivel};"
+            f"font-size:0.9rem;letter-spacing:2px;'>{nivel}</div>"
+            f"<div style='color:#94a3b8;font-size:0.78rem;line-height:1.4;"
+            f"margin-top:0.2rem;'>{desc_nivel}</div>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
+
+    with col_out:
+        color_gauge = "#00ff85" if xg_prob > 0.3 else "#facc15" if xg_prob > 0.1 else "#f87171"
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=xg_prob * 100,
+            number={'suffix': "%", 'font': {'size': 72, 'color': color_gauge,
+                                             'family': 'Bebas Neue'}},
+            title={'text': "Expected Goals (xG)", 'font': {'size': 18, 'color': '#94a3b8'}},
+            gauge={
+                'axis': {'range': [0, 100], 'tickcolor': '#475569'},
+                'bar': {'color': color_gauge, 'thickness': 0.25},
+                'bgcolor': '#0f172a',
+                'bordercolor': '#1e293b',
+                'steps': [
+                    {'range': [0, 15],  'color': 'rgba(239,68,68,0.15)'},
+                    {'range': [15, 40], 'color': 'rgba(250,204,21,0.15)'},
+                    {'range': [40, 100], 'color': 'rgba(0,255,133,0.15)'}
+                ],
+                'threshold': {'line': {'color': 'white', 'width': 3}, 'value': 11.2}
+            }
+        ))
+        fig_gauge.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            height=320,
+            margin=dict(t=20, b=0)
+        )
+        st.plotly_chart(fig_gauge, use_container_width=True)
+
+        refs = {
+            'Tiro Promedio': 0.112,
+            'Big Chance': 0.366,
+            'Penal': 0.829,
+            'Este Tiro': xg_prob
+        }
+        fig_ref = px.bar(
+            x=list(refs.keys()),
+            y=[v*100 for v in refs.values()],
+            color=list(refs.keys()),
+            color_discrete_map={
+                'Tiro Promedio': '#37003c',
+                'Big Chance': '#818cf8',
+                'Penal': '#f472b6',
+                'Este Tiro': color_gauge
+            },
+            text=[f'{v*100:.1f}%' for v in refs.values()],
+            title='Comparacion con Benchmarks de la Temporada'
+        )
+        fig_ref.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            showlegend=False,
+            font=dict(color='white'),
+            title_font=dict(color='#00ff85'),
+            yaxis_title='xG (%)',
+            xaxis=dict(color='white'),
+            yaxis=dict(color='white', gridcolor='rgba(255,255,255,0.08)')
+        )
+        fig_ref.update_traces(textposition='outside', textfont=dict(color='white'))
+        st.plotly_chart(fig_ref, use_container_width=True)
+
+# ═══════════════════════════════════════════════
 # TAB 4: MATCH PREDICTOR
 # ═══════════════════════════════════════════════
 with tabs[3]:
-    st.markdown("<div class='section-title'>Match Predictor — ¿Quién Gana?</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title'>Match Predictor — Quien Gana?</div>", unsafe_allow_html=True)
 
-    st.info("Selecciona las cuotas pre-partido de Bet365 para predecir el resultado H/D/A usando el modelo de regresión logística multinomial entrenado con datos reales.")
+    # Texto introductorio
+    st.markdown(
+        "<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+        "border:1px solid #00ff85;border-radius:12px;padding:1.2rem 1.8rem;"
+        "margin-bottom:1.5rem;'>"
+        "<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:1.1rem;"
+        "letter-spacing:3px;margin-bottom:0.6rem;'>COMO FUNCIONA EL MATCH PREDICTOR?</div>"
+        "<p style='color:#94a3b8;font-size:0.9rem;line-height:1.7;margin-bottom:0.5rem;'>"
+        "El predictor usa dos modelos complementarios entrenados con datos reales de la Premier League 2025/26:"
+        "</p>"
+        "<div style='display:flex;gap:1rem;flex-wrap:wrap;'>"
+        "<div style='flex:1;min-width:200px;background:rgba(0,255,133,0.05);"
+        "border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.8rem;'>"
+        "<div style='color:#00ff85;font-family:Bebas Neue,cursive;font-size:0.9rem;"
+        "letter-spacing:1px;margin-bottom:0.3rem;'>MODELO 2B — RESULTADO H/D/A</div>"
+        "<div style='color:#94a3b8;font-size:0.8rem;line-height:1.5;'>"
+        "Regresion Logistica Multinomial entrenada con odds de Bet365 y probabilidades "
+        "implicitas. Predice la probabilidad de Victoria Local, Empate o Victoria Visitante. "
+        "<b style='color:white;'>Accuracy: ~50% vs Bet365: 49.8%</b>"
+        "</div>"
+        "</div>"
+        "<div style='flex:1;min-width:200px;background:rgba(129,140,248,0.05);"
+        "border:1px solid rgba(129,140,248,0.2);border-radius:8px;padding:0.8rem;'>"
+        "<div style='color:#818cf8;font-family:Bebas Neue,cursive;font-size:0.9rem;"
+        "letter-spacing:1px;margin-bottom:0.3rem;'>MODELO 2A — GOLES TOTALES</div>"
+        "<div style='color:#94a3b8;font-size:0.8rem;line-height:1.5;'>"
+        "Regresion Ridge (L2) que combina el historial de goles de los ultimos 5 partidos "
+        "de cada equipo con las odds de Bet365. Predice el total de goles esperados. "
+        "<b style='color:white;'>Principio de Dixon-Coles (1997)</b>"
+        "</div>"
+        "</div>"
+        "</div>"
+        "</div>",
+        unsafe_allow_html=True
+    )
 
     col_a, col_b = st.columns(2)
     with col_a:
-        st.markdown("#### Cuotas Bet365")
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;letter-spacing:2px;margin-bottom:0.5rem;'>CUOTAS BET365 PRE-PARTIDO</div>", unsafe_allow_html=True)
         cuota_h = st.number_input("Cuota Victoria Local (H)", min_value=1.01, max_value=20.0, value=2.10, step=0.05)
         cuota_d = st.number_input("Cuota Empate (D)", min_value=1.01, max_value=20.0, value=3.40, step=0.05)
         cuota_a = st.number_input("Cuota Victoria Visitante (A)", min_value=1.01, max_value=20.0, value=3.60, step=0.05)
 
-        # Probabilidades implícitas
         inv_h, inv_d, inv_a = 1/cuota_h, 1/cuota_d, 1/cuota_a
         total_inv = inv_h + inv_d + inv_a
         imp_h = inv_h / total_inv
@@ -842,38 +1055,52 @@ with tabs[3]:
         prob_dict = dict(zip(classes, probs))
 
         pred_result = classes[np.argmax(probs)]
-        resultado_labels = {'H': '🏠 Victoria Local', 'D': '🤝 Empate', 'A': '✈️ Victoria Visitante'}
+        resultado_labels = {'H': 'Victoria Local', 'D': 'Empate', 'A': 'Victoria Visitante'}
+
+        # Nota metodologica
+        st.markdown(
+            "<div class='insight-box' style='margin-top:1rem;font-size:0.8rem;'>"
+            "Las cuotas se convierten en <b>probabilidades implicitas</b> (1/cuota normalizada) "
+            "eliminando el margen de la casa de apuestas. Estas son las features del modelo."
+            "</div>",
+            unsafe_allow_html=True
+        )
 
     with col_b:
-        st.markdown("#### Predicción del Modelo")
-        st.markdown(f"<div style='background:#0f172a;border:2px solid #38bdf8;border-radius:12px;padding:1.5rem;text-align:center;'>"
-                    f"<div style='font-size:0.8rem;letter-spacing:2px;color:#64748b;'>RESULTADO PREDICHO</div>"
-                    f"<div style='font-family:Bebas Neue;font-size:2.5rem;color:#38bdf8;margin:0.5rem 0;'>"
-                    f"{resultado_labels.get(pred_result, pred_result)}</div>"
-                    f"<div style='color:#94a3b8;font-size:0.9rem;'>Confianza: {max(probs)*100:.1f}%</div>"
-                    f"</div>", unsafe_allow_html=True)
+        st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;letter-spacing:2px;margin-bottom:0.5rem;'>PREDICCION DEL MODELO</div>", unsafe_allow_html=True)
+        color_pred = '#00ff85' if pred_result == 'H' else '#64748b' if pred_result == 'D' else '#818cf8'
+        st.markdown(
+            f"<div style='background:linear-gradient(135deg,#37003c,#1a0020);"
+            f"border:2px solid {color_pred};border-radius:12px;padding:1.5rem;"
+            f"text-align:center;margin-bottom:1rem;'>"
+            f"<div style='font-size:0.7rem;letter-spacing:2px;color:#64748b;'>RESULTADO PREDICHO</div>"
+            f"<div style='font-family:Bebas Neue;font-size:2.5rem;color:{color_pred};"
+            f"margin:0.5rem 0;'>{resultado_labels.get(pred_result, pred_result)}</div>"
+            f"<div style='color:#94a3b8;font-size:0.9rem;'>Confianza: {max(probs)*100:.1f}%</div>"
+            f"</div>",
+            unsafe_allow_html=True
+        )
 
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # Probabilidades como barras
         labels_map = {'H': 'Local', 'D': 'Empate', 'A': 'Visitante'}
-        colors_map = {'H': '#38bdf8', 'D': '#64748b', 'A': '#818cf8'}
+        colors_map = {'H': '#00ff85', 'D': '#64748b', 'A': '#818cf8'}
 
         for cls in ['H', 'D', 'A']:
             p = prob_dict.get(cls, 0)
             st.markdown(
                 f"<div style='margin:0.3rem 0;'>"
-                f"<div style='display:flex;justify-content:space-between;font-size:0.85rem;color:#94a3b8;'>"
+                f"<div style='display:flex;justify-content:space-between;"
+                f"font-size:0.85rem;color:#94a3b8;'>"
                 f"<span>{labels_map[cls]}</span><span>{p*100:.1f}%</span></div>"
                 f"<div style='background:#1e293b;border-radius:4px;height:8px;margin-top:3px;'>"
-                f"<div style='background:{colors_map[cls]};width:{p*100:.1f}%;height:8px;border-radius:4px;'></div>"
+                f"<div style='background:{colors_map[cls]};width:{p*100:.1f}%;"
+                f"height:8px;border-radius:4px;'></div>"
                 f"</div></div>",
                 unsafe_allow_html=True
             )
 
-    # Goles esperados con Ridge
+    # Goles esperados
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("#### Goles Esperados (Modelo Ridge + Historial)")
+    st.markdown("<div style='font-family:Bebas Neue,cursive;color:#00ff85;font-size:0.9rem;letter-spacing:2px;margin-bottom:0.5rem;'>GOLES ESPERADOS (MODELO RIDGE + HISTORIAL)</div>", unsafe_allow_html=True)
 
     ms = M['matches_sorted']
     equipos = sorted(matches['home_team'].dropna().unique())
@@ -884,7 +1111,6 @@ with tabs[3]:
     with col_eq2:
         equipo_visit = st.selectbox("Equipo Visitante", equipos, index=1)
 
-    # Promedios históricos del equipo
     hist_local = ms[ms['home_team'] == equipo_local][['home_avg_scored','home_avg_conceded']].dropna().tail(1)
     hist_visit = ms[ms['away_team'] == equipo_visit][['away_avg_scored','away_avg_conceded']].dropna().tail(1)
 
@@ -897,9 +1123,10 @@ with tabs[3]:
         ataque_a = as_ + hc
         over_proxy = 1/cuota_h + 1/cuota_a
 
-        X_goles_pred = pd.DataFrame([[hs, hc, as_, ac, ataque_h, ataque_a,
-                                       over_proxy, cuota_h, cuota_d, cuota_a]],
-                                     columns=M['feat_goles'])
+        X_goles_pred = pd.DataFrame(
+            [[hs, hc, as_, ac, ataque_h, ataque_a, over_proxy, cuota_h, cuota_d, cuota_a]],
+            columns=M['feat_goles']
+        )
         goles_pred = M['ridge'].predict(X_goles_pred)[0]
 
         g1, g2, g3 = st.columns(3)
@@ -909,6 +1136,19 @@ with tabs[3]:
             st.metric(f"Forma ofensiva {equipo_local}", f"{hs:.2f} goles/partido")
         with g3:
             st.metric(f"Forma ofensiva {equipo_visit}", f"{as_:.2f} goles/partido")
+
+        st.markdown(
+            "<div class='insight-box' style='margin-top:0.8rem;'>"
+            "<b style='color:#00ff85;'>Como se calcula:</b> "
+            "El modelo Ridge combina el promedio de goles marcados y recibidos por cada equipo "
+            "en sus ultimas 5 jornadas con las odds de Bet365. "
+            "La logica es del principio de Dixon-Coles: "
+            "<b style='color:white;'>goles esperados = ataque propio + vulnerabilidad defensiva rival</b>. "
+            "Un R2 bajo es esperable — predecir goles exactos en futbol es extremadamente dificil "
+            "incluso para los mejores modelos del mundo."
+            "</div>",
+            unsafe_allow_html=True
+        )
     else:
         st.warning("No hay suficiente historial para estos equipos. Se necesitan al menos 2 partidos previos.")
 
