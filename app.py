@@ -687,12 +687,11 @@ with tabs[1]:
             opacity=0.85,
             colorbar=dict(
                 title='xG',
-                tickfont=dict(color='white'),
-                titlefont=dict(color='white')
+                tickfont=dict(color='white')
             ),
             line=dict(color='white', width=0.5)
         ),
-        text=[f"xG: {x:.3f}<br>Min: {m}<br>Equipo: {t}<br>Gol: {'Si' if g else 'No'}"
+        text=[f"xG: {x:.3f} | Min: {m} | Equipo: {t} | Gol: {'Si' if g else 'No'}"
               for x, m, t, g in zip(
                   df_map['xg_pred'],
                   df_map['minute'],
