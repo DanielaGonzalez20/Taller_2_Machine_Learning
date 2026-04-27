@@ -434,24 +434,32 @@ with tabs[0]:
 
    # BUSCA todo el bloque de fig1 y reemplaza por:
     with col1:
-        goal_counts = shots_final['is_goal'].value_counts().reset_index()
-        goal_counts.columns = ['Resultado', 'Cantidad']
-        goal_counts['Resultado'] = goal_counts['Resultado'].map({0: 'No Gol', 1: 'Gol'})
-        goal_counts['Porcentaje'] = goal_counts['Cantidad'] / goal_counts['Cantidad'].sum() * 100
+    counts = shots_final['is_goal'].value_counts().reset_index()
+    counts.columns = ['es_gol', 'cantidad']
+    counts['etiqueta'] = counts['es_gol'].map({0: 'No Gol', 1: 'Gol'})
+    counts['porcentaje'] = counts['cantidad'] / counts['cantidad'].sum() * 100
 
-        fig1 = px.bar(goal_counts, x='Resultado', y='Porcentaje',
-                      color='Resultado',
-                      color_discrete_map={'No Gol': '#37003c', 'Gol': '#00ff85'},
-                      text=goal_counts['Porcentaje'].apply(lambda x: f'{x:.1f}%'),
-                      title='Desbalance de Clases — Variable Objetivo')
-        fig1.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            showlegend=False, font=dict(color='white'),
-            title_font=dict(color='#00ff85'),
-            xaxis=dict(color='white'), yaxis=dict(color='white'))
-        fig1.update_traces(textposition='outside', textfont=dict(color='white', size=14))
-        st.plotly_chart(fig1, use_container_width=True)
-        st.markdown("<div class='insight-box'>⚠️ Solo el <b>11.2%</b> de los tiros son gol — desbalance 8:1. Un modelo naive que siempre prediga 'No Gol' alcanza 88.8% de accuracy pero nunca detecta un gol real. Por esto usamos <b>AUC-ROC</b> como métrica principal y aplicamos <b>class_weight='balanced'</b> en los modelos de ensamble.</div>", unsafe_allow_html=True)
+    fig1 = go.Figure(go.Bar(
+        x=counts['etiqueta'],
+        y=counts['porcentaje'],
+        marker_color=['#37003c', '#00ff85'],
+        text=[f"{v:.1f}%" for v in counts['porcentaje']],
+        textposition='outside',
+        textfont=dict(color='white', size=16)
+    ))
+    fig1.update_layout(
+        title='Desbalance de Clases — Variable Objetivo',
+        title_font=dict(color='#00ff85', size=14),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'),
+        showlegend=False,
+        xaxis=dict(color='white', showgrid=False),
+        yaxis=dict(color='white', showgrid=True,
+                   gridcolor='rgba(255,255,255,0.1)', range=[0, 105])
+    )
+    st.plotly_chart(fig1, use_container_width=True)
+    st.markdown("<div class='insight-box'>Solo el <b>11.2%</b> de los tiros son gol — desbalance 8:1. Un modelo naive que siempre prediga 'No Gol' alcanza 88.8% de accuracy pero nunca detecta un gol real. Por esto usamos <b>AUC-ROC</b> y <b>class_weight='balanced'</b>.</div>", unsafe_allow_html=True)
    # BUSCA todo el bloque de fig2 y reemplaza por:
     with col2:
         bc_stats = shots_final.groupby('is_big_chance')['is_goal'].mean().reset_index()
