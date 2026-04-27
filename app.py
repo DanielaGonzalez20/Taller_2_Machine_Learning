@@ -396,69 +396,37 @@ tabs = st.tabs([
 # ═══════════════════════════════════════════════
 with tabs[0]:
     st.markdown("<div class='section-title'>Análisis Exploratorio de Datos</div>", unsafe_allow_html=True)
-    st.markdown(r"""
-    <div style="background:linear-gradient(135deg,#37003c,#1a0020);border:1px solid #00ff85;border-radius:12px;padding:1.5rem 2rem;margin-bottom:1.5rem;">
-    <div style="font-family:'Bebas Neue',cursive;font-size:1.3rem;color:#00ff85;letter-spacing:3px;margin-bottom:0.8rem;">CONTEXTO DEL PROYECTO</div>
-    <p style="color:#94a3b8;font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">
-    La Premier League 2025/26 genera más de <b style="color:white;">444,000 eventos</b> por temporada. 
-    Cada tiro, pase y tackle queda registrado con coordenadas precisas en una cancha normalizada de 100x100.
-    Las casas de apuestas como Bet365 invierten millones en modelos predictivos y aciertan el 
-    <b style="color:#00ff85;">49.8%</b> de los partidos.
-    </p>
-    <p style="color:#94a3b8;font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;">
-    <b style="color:white;">Nuestra misión:</b> construir un pipeline completo de Machine Learning que intente superar ese benchmark 
-    usando datos reales de <b style="color:white;">7,198 tiros</b> y <b style="color:white;">291 partidos</b> de la temporada actual.
-    </p>
-    <div style="display:flex;gap:2rem;margin-top:1rem;flex-wrap:wrap;">
-         <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
-              <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Modelo 1</div>
-              <div style="color:#94a3b8;font-size:0.8rem;">xG - Expected Goals (Reg. Logística)</div>
-         </div>
-         <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
-              <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Modelo 2A</div>
-              <div style="color:#94a3b8;font-size:0.8rem;">Goles Totales (Ridge L2)</div>
-         </div>
-         <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
-              <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Modelo 2B</div>
-              <div style="color:#94a3b8;font-size:0.8rem;">Resultado H/D/A (Reg. Logística Multinomial)</div>
-         </div>
-         <div style="background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;">
-              <div style="font-family:'Bebas Neue',cursive;color:#00ff85;font-size:1.1rem;">Bonus</div>
-              <div style="color:#94a3b8;font-size:0.8rem;">Random Forest + XGBoost + K-Means</div>
-         </div>
-    </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("<div style='background:linear-gradient(135deg,#37003c,#1a0020);border:1px solid #00ff85;border-radius:12px;padding:1.5rem 2rem;margin-bottom:1.5rem;'><div style='font-family:Bebas Neue,cursive;font-size:1.3rem;color:#00ff85;letter-spacing:3px;margin-bottom:0.8rem;'>CONTEXTO DEL PROYECTO</div><p style='color:#94a3b8;font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;'>La Premier League 2025/26 genera mas de <b style='color:white;'>444,000 eventos</b> por temporada. Cada tiro, pase y tackle queda registrado con coordenadas precisas. Las casas de apuestas como Bet365 aciertan el <b style='color:#00ff85;'>49.8%</b> de los partidos.</p><p style='color:#94a3b8;font-size:0.95rem;line-height:1.7;margin-bottom:0.8rem;'><b style='color:white;'>Nuestra mision:</b> construir un pipeline completo de ML que supere ese benchmark usando datos reales de <b style='color:white;'>7,198 tiros</b> y <b style='color:white;'>291 partidos</b>.</p><div style='display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap;'><div style='background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;'><div style='font-family:Bebas Neue,cursive;color:#00ff85;'>Modelo 1 - xG (Reg. Logistica)</div></div><div style='background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;'><div style='font-family:Bebas Neue,cursive;color:#00ff85;'>Modelo 2A - Goles Totales (Ridge)</div></div><div style='background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;'><div style='font-family:Bebas Neue,cursive;color:#00ff85;'>Modelo 2B - Resultado H/D/A</div></div><div style='background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.2);border-radius:8px;padding:0.6rem 1.2rem;'><div style='font-family:Bebas Neue,cursive;color:#00ff85;'>Bonus - RF + XGBoost + K-Means</div></div></div></div>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
-   # BUSCA todo el bloque de fig1 y reemplaza por:
     with col1:
-      n_gol = int(shots['is_goal'].sum())
-      n_no_gol = int(len(shots) - n_gol)
-      total = n_gol + n_no_gol
+        n_gol = int(shots['is_goal'].sum())
+        n_no_gol = int(len(shots) - n_gol)
+        total = n_gol + n_no_gol
 
-      fig1 = go.Figure(go.Bar(
-        x=['No Gol', 'Gol'],
-        y=[n_no_gol/total*100, n_gol/total*100],
-        marker_color=['#37003c', '#00ff85'],
-        text=[f'{n_no_gol/total*100:.1f}%', f'{n_gol/total*100:.1f}%'],
-        textposition='outside',
-        textfont=dict(color='white', size=16)
-      ))
-      fig1.update_layout(
-        title='Desbalance de Clases — Variable Objetivo',
-        title_font=dict(color='#00ff85', size=14),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='white'),
-        showlegend=False,
-        xaxis=dict(color='white', showgrid=False),
-        yaxis=dict(color='white', range=[0, 105],
-                   gridcolor='rgba(255,255,255,0.1)')
-      )
-      st.plotly_chart(fig1, use_container_width=True)
-      st.markdown("<div class='insight-box'>Solo el <b>11.2%</b> de los tiros son gol — desbalance 8:1. Un modelo naive que siempre prediga No Gol alcanza 88.8% de accuracy pero nunca detecta un gol real. Por esto usamos <b>AUC-ROC</b> y <b>class_weight=balanced</b>.</div>", unsafe_allow_html=True)
+        fig1 = go.Figure(go.Bar(
+            x=['No Gol', 'Gol'],
+            y=[n_no_gol/total*100, n_gol/total*100],
+            marker_color=['#37003c', '#00ff85'],
+            text=[f'{n_no_gol/total*100:.1f}%', f'{n_gol/total*100:.1f}%'],
+            textposition='outside',
+            textfont=dict(color='white', size=16)
+        ))
+        fig1.update_layout(
+            title='Desbalance de Clases - Variable Objetivo',
+            title_font=dict(color='#00ff85', size=14),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            showlegend=False,
+            xaxis=dict(color='white', showgrid=False),
+            yaxis=dict(color='white', range=[0, 105],
+                       gridcolor='rgba(255,255,255,0.1)')
+        )
+        st.plotly_chart(fig1, use_container_width=True)
+        st.markdown("<div class='insight-box'>Solo el <b>11.2%</b> de los tiros son gol - desbalance 8:1. Un modelo naive que siempre prediga No Gol alcanza 88.8% de accuracy pero nunca detecta un gol real. Por esto usamos <b>AUC-ROC</b> y <b>class_weight=balanced</b>.</div>", unsafe_allow_html=True)
+
     with col2:
         bc_stats = shots_final.groupby('is_big_chance')['is_goal'].mean().reset_index()
         bc_stats['Tipo'] = bc_stats['is_big_chance'].map({0: 'Tiro Normal', 1: 'Big Chance'})
@@ -476,8 +444,10 @@ with tabs[0]:
             xaxis=dict(color='white'), yaxis=dict(color='white', title='Conversion (%)'))
         fig2.update_traces(textposition='outside', textfont=dict(color='white', size=14))
         st.plotly_chart(fig2, use_container_width=True)
-        st.markdown("<div class='insight-box'>🎯 Un <b>Big Chance</b> tiene <b>7x mayor</b> probabilidad de gol (36.6% vs 5.5%). Es la variable con mayor <b>Information Gain</b> en el modelo xG — captura el contexto tactico (1v1, portero descolocado) que la geometria sola no puede medir.</div>", unsafe_allow_html=True)
-    col3, col4 = st.columns(2) 
+        st.markdown("<div class='insight-box'>Un <b>Big Chance</b> tiene <b>7x mayor</b> probabilidad de gol (36.6% vs 5.5%). Es la variable con mayor <b>Information Gain</b> en el modelo xG.</div>", unsafe_allow_html=True)
+
+    col3, col4 = st.columns(2)
+
     with col3:
         bins = [0, 15, 30, 45, 60, 75, 90, 105]
         labels = ['0-15', '16-30', '31-45', '46-60', '61-75', '76-90', '90+']
@@ -512,10 +482,9 @@ with tabs[0]:
             bargap=0.3
         )
         st.plotly_chart(fig3, use_container_width=True)
-        st.markdown("<div class='insight-box'>El minuto <b>90+</b> tiene la mayor conversion (>13%) con el menor volumen — fatiga defensiva. Justifica <code>is_final_minutes</code> como feature.</div>", unsafe_allow_html=True)
+        st.markdown("<div class='insight-box'>El minuto <b>90+</b> tiene la mayor conversion (>13%) con el menor volumen - fatiga defensiva. Justifica <code>is_final_minutes</code> como feature.</div>", unsafe_allow_html=True)
 
     with col4:
-        # Distribución resultados H/D/A
         result_counts = matches['ftr'].value_counts()
         fig4 = px.pie(
             values=result_counts.values,
@@ -530,28 +499,28 @@ with tabs[0]:
             title_font=dict(color='#00ff85'),
             legend=dict(font=dict(color='white')))
         st.plotly_chart(fig4, use_container_width=True)
-        st.markdown("<div class='insight-box'>🏠 El local gana el <b>42.3%</b> de los partidos — la ventaja de localía es real. Los <b>empates (26.1%)</b> son el resultado mas difícil de predecir: el modelo logístico tiene Recall=0 para Draw, lo que refleja la alta aleatoriedad táctica de este resultado.</div>", unsafe_allow_html=True)
+        st.markdown("<div class='insight-box'>El local gana el <b>42.3%</b> de los partidos. Los <b>empates (26.1%)</b> son el resultado mas dificil de predecir - el modelo logistico tiene Recall=0 para Draw.</div>", unsafe_allow_html=True)
 
     # Top goleadores
- st.markdown("<div class='section-title'>Top Goleadores</div>", unsafe_allow_html=True)
- top10 = players.nlargest(10, 'goals_scored')[
-        ['web_name','team','position','goals_scored','xG']].copy()
- top10['xG'] = pd.to_numeric(top10['xG'], errors='coerce').round(2)
- top10['Diferencia xG'] = (top10['goals_scored'] - top10['xG']).round(2)
- top10 = top10.rename(columns={
+    st.markdown("<div class='section-title'>Top Goleadores</div>", unsafe_allow_html=True)
+    top10 = players.nlargest(10, 'goals_scored')[
+        ['web_name', 'team', 'position', 'goals_scored', 'xG']].copy()
+    top10['xG'] = pd.to_numeric(top10['xG'], errors='coerce').round(2)
+    top10['Diferencia xG'] = (top10['goals_scored'] - top10['xG']).round(2)
+    top10 = top10.rename(columns={
         'web_name': 'Jugador', 'team': 'Equipo',
         'position': 'Posicion', 'goals_scored': 'Goles',
         'xG': 'xG Esperado'
- })
+    })
 
- def color_diff(val):
+    def color_diff(val):
         if val > 0:
             return 'color: #00ff85; font-weight: bold'
         elif val < 0:
             return 'color: #f87171; font-weight: bold'
         return 'color: white'
 
- styled = top10.style\
+    styled = top10.style\
         .map(color_diff, subset=['Diferencia xG'])\
         .format({'xG Esperado': '{:.2f}', 'Diferencia xG': '{:.2f}'})\
         .hide(axis='index')\
@@ -583,7 +552,10 @@ with tabs[0]:
             ]}
         ])
 
- st.write(styled.to_html(), unsafe_allow_html=True)
+    st.markdown(
+        f"<div style='width:100%;overflow-x:auto;'>{styled.to_html()}</div>",
+        unsafe_allow_html=True
+    )
 # ═══════════════════════════════════════════════
 # TAB 2: SHOT MAP
 # ═══════════════════════════════════════════════
