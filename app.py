@@ -1039,12 +1039,12 @@ with tabs[4]:
 # ═══════════════════════════════════════════════
 with tabs[5]:
     st.markdown("<div class='section-title'>Clustering de Tiros — K-Means</div>", unsafe_allow_html=True)
-    st.write("Segmentación no supervisada de tiros por zona, ángulo y tipo de ocasión.")
+    st.write("Segmentacion no supervisada de tiros por zona, angulo y tipo de ocasion.")
 
     col_k1, col_k2 = st.columns([1, 2])
 
     with col_k1:
-        k = st.slider("Número de clusters (K)", 2, 6, 3)
+        k = st.slider("Numero de clusters (K)", 2, 6, 3)
         feat_km = ['distancia', 'angulo_grados', 'is_big_chance', 'en_area_grande']
         X_km = shots_final[feat_km].fillna(0)
         scaler_km = StandardScaler()
@@ -1053,7 +1053,6 @@ with tabs[5]:
         km = KMeans(n_clusters=k, random_state=42, n_init=10)
         shots_final['cluster'] = km.fit_predict(X_km_sc).astype(str)
 
-        # Perfil de clusters
         profile = shots_final.groupby('cluster').agg(
             Tiros=('is_goal', 'count'),
             Goles=('is_goal', 'sum'),
@@ -1061,42 +1060,117 @@ with tabs[5]:
             Angulo_Medio=('angulo_grados', 'mean'),
             BigChance_Rate=('is_big_chance', 'mean')
         ).reset_index()
-        profile['Conversión (%)'] = (profile['Goles'] / profile['Tiros'] * 100).round(1)
+        profile['Conversion (%)'] = (profile['Goles'] / profile['Tiros'] * 100).round(1)
         profile['Distancia_Media'] = profile['Distancia_Media'].round(1)
         profile['Angulo_Medio'] = profile['Angulo_Medio'].round(1)
         profile['BigChance_Rate'] = (profile['BigChance_Rate'] * 100).round(1)
 
         st.markdown("**Perfil de Clusters:**")
-        st.dataframe(profile[['cluster','Tiros','Conversión (%)','Distancia_Media',
-                               'Angulo_Medio','BigChance_Rate']].rename(
-            columns={'cluster':'Cluster','Distancia_Media':'Dist. Media',
-                     'Angulo_Medio':'Ángulo Medio','BigChance_Rate':'Big Chance %'}),
-            use_container_width=True, hide_index=True)
+        st.dataframe(
+            profile[['cluster', 'Tiros', 'Conversion (%)', 'Distancia_Media',
+                      'Angulo_Medio', 'BigChance_Rate']].rename(
+                columns={'cluster': 'Cluster', 'Distancia_Media': 'Dist. Media',
+                         'Angulo_Medio': 'Angulo Medio', 'BigChance_Rate': 'Big Chance %'}),
+            use_container_width=True, hide_index=True
+        )
 
     with col_k2:
-        df_plot = shots_final[shots_final['x'].between(0,100) & shots_final['y'].between(0,100)].copy()
-        fig_km = px.scatter(
-            df_plot, x='x', y='y',
-            color='cluster',
-            opacity=0.6,
-            size='distancia',
-            size_max=12,
-            color_discrete_sequence=px.colors.qualitative.Bold,
-            title=f'Segmentación de Tiros — {k} Clusters'
-        )
-        fig_km = draw_pitch_opta(fig_km)
+        df_plot = shots_final[shots_final['x'].notna() & shots_final['y'].notna()].copy()
+        df_plot = df_plot[(df_plot['x'] >= 0) & (df_plot['x'] <= 105) &
+                          (df_plot['y'] >= 0) & (df_plot['y'] <= 100)]
+
+        colores_cluster = ['#00ff85', '#818cf8', '#f472b6', '#facc15', '#38bdf8', '#f87171']
+
+        fig_km = go.Figure()
+
+        # Puntos por cluster (encima de la cancha)
+        for cluster_id in sorted(df_plot['cluster'].unique()):
+            mask = df_plot['cluster'] == cluster_id
+            fig_km.add_trace(go.Scatter(
+                x=df_plot[mask]['x'],
+                y=df_plot[mask]['y'],
+                mode='markers',
+                marker=dict(
+                    size=6,
+                    color=colores_cluster[int(cluster_id) % len(colores_cluster)],
+                    opacity=0.75,
+                    line=dict(color='white', width=0.3)
+                ),
+                name=f'Cluster {cluster_id}'
+            ))
+
+        # Cancha verde
+        lc = "rgba(255,255,255,0.95)"
+
+        # Franjas verdes
+        for i in range(10):
+            color = "#2d6e1a" if i % 2 == 0 else "#347d1e"
+            fig_km.add_shape(type="rect",
+                             x0=i*10, y0=0, x1=(i+1)*10, y1=100,
+                             fillcolor=color, line=dict(width=0), layer="below")
+
+        # Borde exterior
+        fig_km.add_shape(type="rect", x0=0, y0=0, x1=100, y1=100,
+                         line=dict(color=lc, width=2.5), layer="below")
+        # Linea media
+        fig_km.add_shape(type="line", x0=50, y0=0, x1=50, y1=100,
+                         line=dict(color=lc, width=2), layer="below")
+        # Circulo central
+        fig_km.add_shape(type="circle", x0=41, y0=41, x1=59, y1=59,
+                         line=dict(color=lc, width=2), layer="below")
+        # Punto central
+        fig_km.add_shape(type="circle", x0=49, y0=49, x1=51, y1=51,
+                         fillcolor=lc, line=dict(color=lc), layer="below")
+        # Area grande derecha
+        fig_km.add_shape(type="rect", x0=83, y0=21.1, x1=100, y1=78.9,
+                         line=dict(color=lc, width=2), layer="below")
+        # Area chica derecha
+        fig_km.add_shape(type="rect", x0=94, y0=36.8, x1=100, y1=63.2,
+                         line=dict(color=lc, width=2), layer="below")
+        # Porteria derecha
+        fig_km.add_shape(type="rect", x0=100, y0=45.2, x1=102, y1=54.8,
+                         line=dict(color=lc, width=2),
+                         fillcolor="rgba(255,255,255,0.3)", layer="below")
+        # Semicirculo derecho
+        fig_km.add_shape(type="circle", x0=77, y0=42, x1=89, y1=58,
+                         line=dict(color=lc, width=2), layer="below")
+        # Punto penal derecho
+        fig_km.add_shape(type="circle", x0=88.5, y0=49.3, x1=89.5, y1=50.7,
+                         fillcolor=lc, line=dict(color=lc), layer="below")
+        # Area grande izquierda
+        fig_km.add_shape(type="rect", x0=0, y0=21.1, x1=17, y1=78.9,
+                         line=dict(color=lc, width=2), layer="below")
+        # Area chica izquierda
+        fig_km.add_shape(type="rect", x0=0, y0=36.8, x1=6, y1=63.2,
+                         line=dict(color=lc, width=2), layer="below")
+        # Porteria izquierda
+        fig_km.add_shape(type="rect", x0=-2, y0=45.2, x1=0, y1=54.8,
+                         line=dict(color=lc, width=2),
+                         fillcolor="rgba(255,255,255,0.3)", layer="below")
+        # Semicirculo izquierdo
+        fig_km.add_shape(type="circle", x0=11, y0=42, x1=23, y1=58,
+                         line=dict(color=lc, width=2), layer="below")
+        # Punto penal izquierdo
+        fig_km.add_shape(type="circle", x0=10.5, y0=49.3, x1=11.5, y1=50.7,
+                         fillcolor=lc, line=dict(color=lc), layer="below")
+        # Esquinas
+        for cx, cy in [(0, 0), (0, 100), (100, 0), (100, 100)]:
+            fig_km.add_shape(type="circle",
+                             x0=cx-3, y0=cy-3, x1=cx+3, y1=cy+3,
+                             line=dict(color=lc, width=1.5), layer="below")
+
         fig_km.update_layout(
+            title=f'Segmentacion de Tiros - {k} Clusters',
+            title_font=dict(color='#00ff85', size=14),
             paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='#0a1628',
-            height=500,
-            font=dict(color='#94a3b8'),
-            legend=dict(bgcolor='rgba(0,0,0,0)'),
-            margin=dict(t=40, b=10)
+            plot_bgcolor='#2d6e1a',
+            height=550,
+            font=dict(color='white'),
+            xaxis=dict(range=[-5, 105], showgrid=False, visible=False),
+            yaxis=dict(range=[-5, 105], showgrid=False, visible=False),
+            legend=dict(bgcolor='rgba(0,0,0,0)', font=dict(color='white')),
+            margin=dict(t=40, b=10, l=0, r=10)
         )
         st.plotly_chart(fig_km, use_container_width=True)
 
-    st.markdown("<div class='insight-box'>El clustering revela patrones naturales en los tipos de tiro: tiros de larga distancia con bajo xG, remates en el área chica con alta conversión, y Big Chances distribuidas en el centro del área grande.</div>", unsafe_allow_html=True)
-
-# Footer
-st.markdown("---")
-st.markdown("<p style='text-align:center;color:#1e293b;font-size:0.75rem;letter-spacing:2px;'>MACHINE LEARNING I · UNIVERSIDAD EXTERNADO DE COLOMBIA · 2026</p>", unsafe_allow_html=True)
+    st.markdown("<div class='insight-box'>El clustering revela patrones naturales en los tipos de tiro: tiros de larga distancia con bajo xG, remates en el area chica con alta conversion, y Big Chances distribuidas en el centro del area grande.</div>", unsafe_allow_html=True)
