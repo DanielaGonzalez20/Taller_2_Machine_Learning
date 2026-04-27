@@ -125,10 +125,10 @@ html, body, [class*="css"] {
 }
 .stTabs [data-baseweb="tab"] {
     background: transparent;
-    color: #475569;
+    color: white !important;
     border-radius: 8px;
     font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
+    font-weight: 700 !important;
     letter-spacing: 1px;
     font-size: 0.8rem;
     padding: 0.5rem 1rem;
